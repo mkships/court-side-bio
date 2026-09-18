@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function NotFound() { return <main className="auth-page theme-centre"><section className="auth-card"><div className="meta">404 · Out of bounds</div><h1>This page isn’t available.</h1><p className="muted">The profile may be unpublished, deleted, or the link may be incorrect.</p><Link href="/" className="button">Go to courtsidebio</Link></section></main>; }
