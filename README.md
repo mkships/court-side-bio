@@ -26,7 +26,7 @@ npm run build
 This project uses email/password authentication, private profile-photo storage, owner-only drafts and a deliberately public published snapshot table.
 
 1. Create a free Supabase project.
-2. Open **SQL Editor** and run the files in `supabase/migrations/` in filename order. Existing projects must apply every newer migration they have not run, including `202609170002_harden_unpublish.sql`, `202609170003_username_availability.sql`, `202609170004_reserve_route_usernames.sql` and `202610210001_padel_and_hard_court.sql`.
+2. Open **SQL Editor** and run the files in `supabase/migrations/` in filename order. Existing projects must apply every newer migration they have not run, including `202609170002_harden_unpublish.sql`, `202609170003_username_availability.sql`, `202609170004_reserve_route_usernames.sql`, `202609170005_rpc_only_profile_writes.sql` and `202610210001_padel_and_hard_court.sql`.
 3. In **Authentication → URL Configuration**, set the local Site URL to `http://localhost:3000` and add `http://localhost:3000/auth/callback**` as an allowed redirect URL. The wildcard permits the safe `next` query used for signup and password recovery.
 4. Copy the Project URL and public anon key from **Project Settings → API** into `.env.local`:
 
@@ -40,11 +40,12 @@ This project uses email/password authentication, private profile-photo storage, 
 
 Never put the Supabase service-role key in this project or in a `NEXT_PUBLIC_` variable. The application does not need it.
 
-The SQL migration creates:
+The SQL migrations create:
 
-- `profile_drafts`, readable and writable only by its owning authenticated user;
-- `published_profiles`, publicly readable and owner-managed;
-- atomic `save_my_draft`, `publish_my_profile` and `unpublish_my_profile` functions;
+- `profile_drafts`, readable only by its owning authenticated user;
+- `published_profiles`, publicly readable;
+- atomic `save_my_draft`, `publish_my_profile` and `unpublish_my_profile` functions, which are the only way to write either table (clients have no direct insert or update access);
+- check constraints that reject reserved usernames on both tables;
 - a private `profile-photos` bucket with MIME, size and ownership policies.
 
 Published profile reads are uncached initially so unpublishing takes effect immediately. Profile images use stable private object keys; a short-lived signed URL is created only after the profile is found in the published table.
