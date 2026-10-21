@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { BallMark } from "@/components/CourtArt";
 
 export function LaunchScreen() {
   const [leaving, setLeaving] = useState(false);
@@ -35,6 +36,6 @@ export function LaunchScreen() {
   return <div className={`launch-screen${leaving ? " is-leaving" : ""}`} aria-hidden="true">
     <div className="launch-panel launch-panel-left" />
     <div className="launch-panel launch-panel-right" />
-    <div className="launch-wordmark"><span className="brand-mark">C</span><span>COURTSIDEBIO</span></div>
+    <div className="launch-wordmark"><span className="launch-ball"><BallMark size={34} /></span><span>COURTSIDEBIO</span></div>
   </div>;
 }

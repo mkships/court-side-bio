@@ -9,15 +9,15 @@ export const whatsappSchema = z.union([z.literal(""), z.string().regex(/^\+[1-9]
 
 export const profileSchema = z.object({
   schemaVersion: z.literal(1), username: usernameSchema, name: z.string().trim().min(2).max(80),
-  headline: z.string().max(120), bio: z.string().max(250), sports: z.array(z.enum(["tennis", "pickleball"])).min(1),
+  headline: z.string().max(120), bio: z.string().max(250), sports: z.array(z.enum(["tennis", "pickleball", "padel"])).min(1),
   roles: z.array(z.enum(["coach", "hitting_partner"])).min(1), location: z.string().max(100), photoUrl: optionalUrl, photoKey: z.string().max(300),
   email: emailSchema, whatsapp: whatsappSchema, timezone: z.string().min(1), currency: z.string().length(3),
-  ratingSystem: z.enum(["UTR", "DUPR", "NTRP", "Other"]), ratingValue: z.string().max(20), ratingUrl: optionalUrl,
+  ratingSystem: z.enum(["UTR", "DUPR", "NTRP", "Playtomic", "Other"]), ratingValue: z.string().max(20), ratingUrl: optionalUrl,
   playingBackground: z.string().max(500), coachingExperience: z.string().max(500),
   services: z.array(z.object({ type: z.enum(["coaching", "hitting"]), enabled: z.boolean(), price: z.number().min(0).max(100000).nullable(), note: z.string().max(140) })),
   availability: z.array(z.object({ weekday: z.number().int().min(0).max(6), start: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/) })).refine((slots) => new Set(slots.map((slot) => `${slot.weekday}-${slot.start}`)).size === slots.length, "Duplicate availability slot"),
   availabilityVisible: z.boolean(), links: z.object({ instagram: optionalUrl, youtube: optionalUrl, website: optionalUrl }),
-  theme: z.enum(["centre", "clay", "night"]), blockOrder: z.array(z.enum(["credentials", "services", "availability", "links"])).length(4),
+  theme: z.enum(["centre", "clay", "hard", "night"]), blockOrder: z.array(z.enum(["credentials", "services", "availability", "links"])).length(4),
   hiddenBlocks: z.array(z.enum(["credentials", "services", "availability", "links"]))
 }).superRefine((profile, context) => {
   if (!profile.email && !profile.whatsapp) context.addIssue({ code: "custom", path: ["email"], message: "Add an email or WhatsApp number" });

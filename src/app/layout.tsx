@@ -15,7 +15,7 @@ const barlowCondensed = Barlow_Condensed({
   display: "swap",
 });
 
-export const metadata: Metadata = { title: "courtsidebio — Your court. Your page.", description: "A distinctive digital identity for tennis and pickleball coaches and hitting partners." };
+export const metadata: Metadata = { title: "courtsidebio — Your court. Your page.", description: "Link-in-bio pages for tennis, pickleball and padel coaches and hitting partners." };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return <html lang="en" className={`${inter.variable} ${barlowCondensed.variable}`}><body>{children}</body></html>;
