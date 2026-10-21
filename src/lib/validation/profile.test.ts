@@ -8,6 +8,10 @@ describe("profile validation", () => {
     expect(usernameSchema.safeParse("Dashboard").success).toBe(false);
   });
 
+  it("rejects usernames that collide with app routes", () => {
+    for (const route of ["auth", "recover", "update-password"]) expect(usernameSchema.safeParse(route).success).toBe(false);
+  });
+
   it("requires a contact method to publish", () => {
     const result = validateForPublish({ ...demoProfile, email: "", whatsapp: "" });
     expect(result.success).toBe(false);
