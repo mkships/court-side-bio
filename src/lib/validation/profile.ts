@@ -1,6 +1,7 @@
 import { z } from "zod";
 
-export const reservedUsernames = new Set(["about", "admin", "api", "dashboard", "demo", "help", "login", "onboarding", "pricing", "settings", "signup", "studio", "support", "terms"]);
+// Keep in sync with public.is_reserved_username in supabase/migrations.
+export const reservedUsernames = new Set(["about", "admin", "api", "auth", "dashboard", "demo", "help", "login", "onboarding", "pricing", "recover", "settings", "signup", "studio", "support", "terms", "update-password"]);
 export const usernameSchema = z.string().trim().toLowerCase().regex(/^[a-z0-9][a-z0-9_-]{2,23}$/, "Use 3–24 lowercase letters, numbers, hyphens or underscores").refine((value) => !reservedUsernames.has(value), "That username is reserved");
 const optionalUrl = z.union([z.literal(""), z.string().url().refine((value) => value.startsWith("https://") || value.startsWith("data:image/"), "Use a secure https:// URL")]);
 export const emailSchema = z.union([z.literal(""), z.string().email("Enter a valid email address")]);
