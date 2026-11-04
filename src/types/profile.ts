@@ -1,7 +1,9 @@
 export const BLOCKS = ["credentials", "services", "availability", "links"] as const;
 export type BlockKey = (typeof BLOCKS)[number];
-export type ThemeKey = "centre" | "clay" | "night";
-export type Sport = "tennis" | "pickleball";
+export type ThemeKey = "centre" | "clay" | "hard" | "night";
+export const SPORTS = ["tennis", "pickleball", "padel"] as const;
+export type Sport = (typeof SPORTS)[number];
+export const sportLabel = (sport: Sport) => sport[0].toUpperCase() + sport.slice(1);
 export type Role = "coach" | "hitting_partner";
 
 export type Service = {
@@ -28,7 +30,7 @@ export type Profile = {
   whatsapp: string;
   timezone: string;
   currency: string;
-  ratingSystem: "UTR" | "DUPR" | "NTRP" | "Other";
+  ratingSystem: "UTR" | "DUPR" | "NTRP" | "Playtomic" | "Other";
   ratingValue: string;
   ratingUrl: string;
   playingBackground: string;

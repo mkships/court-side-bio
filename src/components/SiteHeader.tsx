@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { BallMark } from "@/components/CourtArt";
 
 export function SiteHeader({ studio = false }: { studio?: boolean }) {
   const [hidden, setHidden] = useState(false);
@@ -19,8 +20,8 @@ export function SiteHeader({ studio = false }: { studio?: boolean }) {
   }, []);
 
   return <header className={`site-header${hidden ? " is-hidden" : ""}`}>
-    <Link href="/" className="brand" aria-label="courtsidebio home"><span className="brand-mark" aria-hidden="true">C</span><span>courtsidebio</span></Link>
-    <span className="meta hide-mobile">Identity for racket sport pros</span>
+    <Link href="/" className="brand" aria-label="courtsidebio home"><BallMark size={26} /><span>courtsidebio</span></Link>
+    <span className="meta hide-mobile header-tag">Tennis · Pickleball · Padel</span>
     <span className="nav-spacer" />
     {studio ? <Link className="button small" href="/demo">View demo page ↗</Link> : <>
       <Link className="button small ghost hide-mobile" href="/demo">View demo</Link>

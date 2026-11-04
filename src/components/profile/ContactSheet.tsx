@@ -29,6 +29,7 @@ export function ContactSheet({ profile, slots, open, onClose, initialService = "
       if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     }}>
+      <div className="sheet-grabber" aria-hidden="true" />
       <div className="dialog-head"><h2 id="contact-title">Contact {profile.name.split(" ")[0]}</h2><button ref={closeRef} className="icon-button" onClick={onClose} aria-label="Close contact form">×</button></div>
       {enabledServices.length > 0 && <fieldset className="field"><legend>What are you looking for?</legend><div className="radio-list">
         <label className="radio-option"><input type="radio" name="service" checked={!service} onChange={() => setService("")} /> General training inquiry</label>
