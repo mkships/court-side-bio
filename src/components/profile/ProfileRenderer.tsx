@@ -7,6 +7,7 @@ import { upcomingSlots } from "@/lib/availability";
 import { serviceName, sportLabel, type BlockKey, type Profile, type ServiceType, type UpcomingSlot } from "@/types/profile";
 import { BallMark, CourtLines, LinkIcon, SportIcon } from "@/components/CourtArt";
 import { ContactSheet } from "./ContactSheet";
+import { ShareButton } from "./ShareButton";
 
 const currency = (code: string, value: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: code, maximumFractionDigits: value % 1 ? 2 : 0 }).format(value);
 const linkNames: Record<keyof Profile["links"], string> = { instagram: "Instagram", youtube: "YouTube", website: "Website" };
@@ -101,7 +102,10 @@ export function ProfileRenderer({ profile, preview = false }: { profile: Profile
         <CourtLines sport={profile.sports[0]} className="profile-court" />
         <div className="profile-topline">
           <span className="sport-badges">{profile.sports.map((sport) => <span className="sport-badge" key={sport}><SportIcon sport={sport} size={14} />{sportLabel(sport)}</span>)}</span>
-          <button className="button small" onClick={() => openContact()} aria-label={`Contact ${firstName}`}>Contact ↗</button>
+          <span className="topline-actions">
+            {!preview && <ShareButton title={`${profile.name} on courtsidebio`} />}
+            <button className="button small" onClick={() => openContact()} aria-label={`Contact ${firstName}`}>Contact ↗</button>
+          </span>
         </div>
         <div className="avatar">{profile.photoUrl ? <Image src={profile.photoUrl} alt={`${profile.name} portrait`} width={240} height={240} unoptimized /> : <span>{initials}</span>}</div>
         <h1>{profile.name || "Your name"}</h1>

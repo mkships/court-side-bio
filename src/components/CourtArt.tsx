@@ -1,7 +1,7 @@
 import type { Sport } from "@/types/profile";
 
 // Top-down court markings drawn to each sport's real proportions (tennis in feet, pickleball in feet, padel in metres).
-const courts: Record<Sport, { width: number; height: number; lines: string }> = {
+export const courts: Record<Sport, { width: number; height: number; lines: string }> = {
   tennis: { width: 78, height: 36, lines: "M0 4.5H78M0 31.5H78M18 4.5V31.5M60 4.5V31.5M18 18H60M0 18H1.2M76.8 18H78" },
   pickleball: { width: 44, height: 20, lines: "M15 0V20M29 0V20M0 10H15M29 10H44" },
   padel: { width: 20, height: 10, lines: "M3.05 0V10M16.95 0V10M3.05 5H16.95" },

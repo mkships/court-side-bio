@@ -194,6 +194,7 @@ html[data-launched] .launch-screen { display: none; }
 .profile-hero::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 45% at 50% 66%, color-mix(in srgb, var(--hero) 82%, transparent), transparent); pointer-events: none; }
 .profile-hero > :not(.profile-court) { position: relative; z-index: 1; }
 .profile-topline { align-self: stretch; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.topline-actions { display: flex; gap: 6px; flex: none; }
 .profile-topline .button { background: rgba(255,255,255,.14); color: var(--heroInk); border-color: rgba(255,255,255,.3); backdrop-filter: blur(8px); }
 .avatar { width: 124px; height: 124px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); color: var(--ink); font-family: var(--type-display); font-size: 2.6rem; font-weight: 800; margin: 26px 0 16px; overflow: hidden; box-shadow: 0 0 0 4px var(--pop), 0 18px 40px rgba(0,0,0,.25); }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -341,6 +342,14 @@ button.slot:hover { background: var(--pop); color: var(--onPop); border-color: t
 .strength-item { border: 1.5px dashed var(--line); background: var(--bg); color: var(--ink); border-radius: 999px; padding: 7px 12px; font-size: .8rem; font-weight: 700; transition: border-color .2s ease, background-color .2s ease; }
 .strength-item:hover { border-color: var(--ink); border-style: solid; }
 .strength-done { margin: 0; }
+.share-kit { display: flex; gap: 18px; align-items: center; }
+.share-qr { flex: none; width: 132px; height: 132px; border-radius: 14px; overflow: hidden; background: #fff; padding: 6px; box-shadow: 0 0 0 1px var(--line); }
+.share-qr svg { display: block; width: 100%; height: 100%; }
+.share-copy { min-width: 0; display: grid; gap: 4px; }
+.share-copy .card-label { margin-bottom: 2px; }
+.share-url { font-weight: 800; font-size: 1.05rem; color: var(--ink); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.share-url:hover { text-decoration: underline; text-underline-offset: 3px; }
+.share-copy .muted { margin: 2px 0 8px; font-size: .82rem; }
 .lineup { padding: 18px 18px 8px; }
 .lineup-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
 .lineup-row.is-hidden .lineup-main, .lineup-row.is-hidden .lineup-index { opacity: .45; }
@@ -463,6 +472,8 @@ button.slot:hover { background: var(--pop); color: var(--onPop); border-color: t
   .overview-pair, .form-grid { grid-template-columns: 1fr; }
   .service-fields { grid-template-columns: 1fr 1fr; gap: 10px; }
   .day-row { grid-template-columns: 1fr; }
+  .share-kit { align-items: flex-start; }
+  .share-qr { width: 96px; height: 96px; }
   .day-head { grid-template-columns: auto auto 1fr; align-items: baseline; gap: 4px 10px; }
   .day-actions { margin: 0; justify-self: end; }
   .auth-card { padding: 22px; }

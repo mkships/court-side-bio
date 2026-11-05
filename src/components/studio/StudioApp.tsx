@@ -6,6 +6,7 @@ import { emptyProfile } from "@/lib/fixtures";
 import { createClient, hasSupabaseConfig } from "@/lib/supabase/client";
 import { emailSchema, usernameSchema, validateForPublish, whatsappSchema } from "@/lib/validation/profile";
 import { PhotoUpload } from "./PhotoUpload";
+import { ShareKit } from "./ShareKit";
 import Image from "next/image";
 import { CourtLines, SportIcon } from "@/components/CourtArt";
 import { MAX_TESTIMONIALS, SESSION_LENGTHS, SPORTS, serviceName, sportLabel, type BlockKey, type Profile, type Role, type Service, type Sport, type Testimonial, type ThemeKey } from "@/types/profile";
@@ -149,6 +150,7 @@ export function StudioApp() {
             <span className="identity-copy"><span className="meta">Identity</span><strong>{draft.name}</strong><span className="overview-meta">{draft.roles.map((r) => r === "coach" ? "Coach" : "Hitting partner").join(" + ")} · {draft.location || "Add location"}</span></span>
             <span className="sport-badges">{draft.sports.map((sport) => <span className="sport-badge" key={sport}><SportIcon sport={sport} size={13} />{sportLabel(sport)}</span>)}</span>
           </button>
+          {published && <ShareKit username={published.username} name={published.name} />}
           <StrengthCard profile={draft} onFix={setFocus} />
           <div className="overview-pair">
             <button className="overview-card" onClick={() => setFocus("contact")}><span className="meta">Contact</span><span className="overview-summary">{[draft.whatsapp && "WhatsApp", draft.email && "Email"].filter(Boolean).join(" + ") || "Not set"}</span><span className="overview-meta">Outbound messages only</span></button>

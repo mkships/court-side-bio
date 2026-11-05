@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { hasSupabaseConfig } from "@/lib/supabase/client";
+import { hasSupabaseConfig } from "@/lib/supabase/config";
 import { CLAIM_KEY, cleanUsername } from "@/lib/storageKeys";
 
 /** Landing-page username field. The typed name is carried into onboarding. */

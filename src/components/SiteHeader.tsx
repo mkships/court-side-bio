@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { BallMark } from "@/components/CourtArt";
-import { createClient, hasSupabaseConfig } from "@/lib/supabase/client";
+import { hasSupabaseConfig } from "@/lib/supabase/config";
 import { WORKSPACE_KEY } from "@/lib/storageKeys";
 
 function StudioAccountAction() {
@@ -12,6 +12,8 @@ function StudioAccountAction() {
   const [busy, setBusy] = useState(false);
   if (hasSupabaseConfig()) return <button className="button small" disabled={busy} onClick={async () => {
     setBusy(true);
+    // Loaded on click so the marketing pages that share this header don't ship the Supabase SDK.
+    const { createClient } = await import("@/lib/supabase/client");
     await createClient()!.auth.signOut();
     router.push("/");
     router.refresh();
