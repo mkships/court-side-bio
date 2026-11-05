@@ -8,6 +8,8 @@ const optionalUrl = (message: string) => z.string().refine((value) => value === 
 export const emailSchema = z.union([z.literal(""), z.string().email("Enter a valid email address")]);
 export const whatsappSchema = z.union([z.literal(""), z.string().regex(/^\+[1-9]\d{7,14}$/, "Use an international WhatsApp number such as +14155550123")]);
 
+const blockKey = z.enum(["credentials", "services", "testimonials", "availability", "links"]);
+
 export const profileSchema = z.object({
   schemaVersion: z.literal(1), username: usernameSchema,
   name: z.string().trim().min(2, "Add your full name").max(80, "Keep your name under 80 characters"),
@@ -29,8 +31,16 @@ export const profileSchema = z.object({
   availability: z.array(z.object({ weekday: z.number().int().min(0).max(6), start: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/) })).refine((slots) => new Set(slots.map((slot) => `${slot.weekday}-${slot.start}`)).size === slots.length, "Duplicate availability slot"),
   availabilityVisible: z.boolean(),
   links: z.object({ instagram: optionalUrl("Instagram link must be a full https:// link"), youtube: optionalUrl("YouTube link must be a full https:// link"), website: optionalUrl("Website link must be a full https:// link") }),
-  theme: z.enum(["centre", "clay", "hard", "night"]), blockOrder: z.array(z.enum(["credentials", "services", "availability", "links"])).length(4),
-  hiddenBlocks: z.array(z.enum(["credentials", "services", "availability", "links"]))
+  // Profiles published before testimonials existed have no list; keep in sync with validate_profile_payload.
+  testimonials: z.array(z.object({
+    quote: z.string().trim().min(1, "Add the quote or remove the empty testimonial").max(280, "Keep each testimonial under 280 characters"),
+    name: z.string().trim().min(1, "Add who each testimonial is from").max(60, "Keep testimonial names under 60 characters"),
+    context: z.string().max(60, "Keep testimonial context under 60 characters")
+  })).max(3, "Show up to 3 testimonials").default([]),
+  theme: z.enum(["centre", "clay", "hard", "night"]),
+  // Older payloads have four blocks; normalizeProfile adds any that are missing.
+  blockOrder: z.array(blockKey).min(1).max(5).refine((order) => new Set(order).size === order.length, "Each block can only appear once"),
+  hiddenBlocks: z.array(blockKey)
 }).superRefine((profile, context) => {
   if (!profile.email && !profile.whatsapp) context.addIssue({ code: "custom", path: ["email"], message: "Add an email or WhatsApp number so players can reach you" });
 });

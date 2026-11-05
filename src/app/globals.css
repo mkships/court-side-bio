@@ -243,6 +243,12 @@ html[data-launched] .launch-screen { display: none; }
 .slot { white-space: nowrap; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 999px; padding: 7px 12px; font-size: .8rem; font-weight: 700; font-variant-numeric: tabular-nums; transition: background-color .2s ease, border-color .2s ease; }
 button.slot:hover { background: var(--pop); color: var(--onPop); border-color: transparent; }
 
+.quote-list { display: grid; gap: 10px; }
+.quote { margin: 0; background: var(--bg); border-radius: var(--radius-sm); padding: 16px 16px 14px 18px; position: relative; overflow: hidden; }
+.quote::before { content: "“"; position: absolute; right: 10px; top: -18px; font-family: var(--type-display); font-size: 6rem; font-weight: 800; line-height: 1; color: var(--pop); opacity: .9; pointer-events: none; }
+.quote blockquote { margin: 0; font-size: .98rem; line-height: 1.5; font-weight: 500; position: relative; padding-right: 26px; }
+.quote figcaption { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-top: 10px; font-size: .86rem; }
+.quote figcaption .meta { color: var(--sub); font-size: .6rem; }
 .link-list { display: grid; gap: 8px; }
 .link-tile { display: flex; align-items: center; gap: 12px; border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 14px 15px; text-decoration: none; background: var(--bg); font-weight: 700; transition: transform .25s var(--ease), border-color .2s ease; }
 .link-tile span:nth-child(2) { flex: 1; }
@@ -356,6 +362,8 @@ button.slot:hover { background: var(--pop); color: var(--onPop); border-color: t
 .service-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
 .service-fields .field { margin: 0; }
 .service-note { grid-column: 1 / -1; }
+.testimonial-meta { margin-top: 14px; }
+.add-testimonial { justify-self: start; border-style: dashed; }
 .day-row { display: grid; grid-template-columns: 130px 1fr; gap: 12px; align-items: start; }
 .day-head { display: grid; gap: 3px; justify-items: start; }
 .day-count { color: var(--sub); font-size: .6rem; }

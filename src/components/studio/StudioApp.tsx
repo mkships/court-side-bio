@@ -8,7 +8,7 @@ import { emailSchema, usernameSchema, validateForPublish, whatsappSchema } from 
 import { PhotoUpload } from "./PhotoUpload";
 import Image from "next/image";
 import { CourtLines, SportIcon } from "@/components/CourtArt";
-import { SESSION_LENGTHS, SPORTS, serviceName, sportLabel, type BlockKey, type Profile, type Role, type Service, type Sport, type ThemeKey } from "@/types/profile";
+import { MAX_TESTIMONIALS, SESSION_LENGTHS, SPORTS, serviceName, sportLabel, type BlockKey, type Profile, type Role, type Service, type Sport, type Testimonial, type ThemeKey } from "@/types/profile";
 import { normalizeProfile } from "@/lib/profiles/normalize";
 import { CLAIM_KEY, WORKSPACE_KEY, cleanUsername } from "@/lib/storageKeys";
 import { currencies, detectTimezone, groupedTimezones, timezoneLabel } from "@/lib/locale";
@@ -24,7 +24,7 @@ const themes: { key: ThemeKey; name: string }[] = [
   { key: "hard", name: "Hard Court" },
   { key: "night", name: "Night Session" }
 ];
-const labels: Record<BlockKey, string> = { credentials: "Credentials", services: "Services", availability: "Availability", links: "Links" };
+const labels: Record<BlockKey, string> = { credentials: "Credentials", services: "Services", testimonials: "Testimonials", availability: "Availability", links: "Links" };
 const clone = (profile: Profile): Profile => JSON.parse(JSON.stringify(profile));
 const comparableProfile = (profile: Profile | null, configured: boolean) => profile ? { ...profile, photoUrl: configured ? "" : profile.photoUrl } : null;
 const canonicalize = (value: unknown): unknown => Array.isArray(value) ? value.map(canonicalize) : value && typeof value === "object" ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b)).map(([key, item]) => [key, canonicalize(item)])) : value;
@@ -124,7 +124,7 @@ export function StudioApp() {
   if (!ready) return <div className="auth-page theme-centre"><CourtLines className="auth-court" /><div className="meta loading-call">Preparing your studio…</div></div>;
   if (onboardingStep > 0) return <Onboarding profile={draft} step={onboardingStep} setStep={setOnboardingStep} patch={patch} />;
 
-  const blockSummary = (key: BlockKey) => key === "credentials" ? (draft.ratingValue ? `${draft.ratingSystem} ${draft.ratingValue}` : "Add your background") : key === "services" ? servicesSummary(draft.services) : key === "availability" ? `${draft.availability.length} weekly slots` : `${Object.values(draft.links).filter(Boolean).length} links`;
+  const blockSummary = (key: BlockKey) => key === "credentials" ? (draft.ratingValue ? `${draft.ratingSystem} ${draft.ratingValue}` : "Add your background") : key === "services" ? servicesSummary(draft.services) : key === "testimonials" ? (draft.testimonials.length ? `${draft.testimonials.length} of ${MAX_TESTIMONIALS} quotes` : "Add a player quote") : key === "availability" ? `${draft.availability.length} weekly slots` : `${Object.values(draft.links).filter(Boolean).length} links`;
   const status = !published ? "Not published" : dirty ? "Unpublished changes" : "Live";
   const statusTone = !published ? "off" : dirty ? "pending" : "live";
   const initials = draft.name.split(/\s+/).map((part) => part[0]).slice(0, 2).join("") || "?";
@@ -215,6 +215,7 @@ function EditorSection({ focus, profile, patch, toggleArray, toggleSlot, toggleB
   if (focus === "contact") return <div className="editor-section"><p className="muted">At least one method is required to publish. These details appear only on the published snapshot.</p><Field label="WhatsApp · international format" value={profile.whatsapp} onChange={(whatsapp)=>patch({whatsapp})} placeholder="+14155550123"/><Field label="Contact email" value={profile.email} onChange={(email)=>patch({email})} type="email"/></div>;
   if (focus === "credentials") return <div className="editor-section"><div className="form-grid"><label className="field"><span>Rating system</span><select value={profile.ratingSystem} onChange={(e)=>patch({ratingSystem:e.target.value as Profile["ratingSystem"]})}>{["UTR","DUPR","NTRP","Playtomic","Other"].map(x=><option key={x}>{x}</option>)}</select></label><Field label="Rating · self-reported" value={profile.ratingValue} onChange={(ratingValue)=>patch({ratingValue})}/></div><Field label="Rating source URL" value={profile.ratingUrl} onChange={(ratingUrl)=>patch({ratingUrl})} placeholder="https://"/><label className="field"><span>Playing background</span><textarea rows={4} value={profile.playingBackground} onChange={(e)=>patch({playingBackground:e.target.value})}/></label><label className="field"><span>Coaching experience</span><textarea rows={4} value={profile.coachingExperience} onChange={(e)=>patch({coachingExperience:e.target.value})}/></label></div>;
   if (focus === "services") return <ServicesEditor profile={profile} patch={patch} />;
+  if (focus === "testimonials") return <TestimonialsEditor profile={profile} patch={patch} />;
   if (focus === "availability") return <AvailabilityEditor profile={profile} patch={patch} toggleSlot={toggleSlot} />;
   if (focus === "links") return <div className="editor-section"><Field label="Instagram URL" value={profile.links.instagram} placeholder="https://" onChange={(instagram)=>patch({links:{...profile.links,instagram}})}/><Field label="YouTube URL" value={profile.links.youtube} placeholder="https://" onChange={(youtube)=>patch({links:{...profile.links,youtube}})}/><Field label="Website URL" value={profile.links.website} placeholder="https://" onChange={(website)=>patch({links:{...profile.links,website}})}/></div>;
   return <div className="editor-section"><div className="theme-picker">{themes.map(theme=><button key={theme.key} className="theme-option" aria-pressed={profile.theme===theme.key} onClick={()=>patch({theme:theme.key})}><span className={`theme-court theme-${theme.key}`} aria-hidden="true"><CourtLines sport={profile.sports[0]}/></span><strong>{theme.name}</strong></button>)}</div><h2 className="section-title">Arrange your blocks</h2>{profile.blockOrder.map((key)=><div className="section-card-head section-card" key={key}><strong>{labels[key]}</strong><button className="toggle" aria-pressed={!profile.hiddenBlocks.includes(key)} onClick={()=>toggleBlock(key)}>{profile.hiddenBlocks.includes(key)?"Hidden":"Shown"}</button></div>)}<p className="muted">Identity stays first and contact remains available. Empty blocks are automatically omitted.</p></div>;
@@ -285,5 +286,19 @@ function ServicesEditor({ profile, patch }: { profile: Profile; patch: (value: P
         <div className="service-note"><Field label="Short note" value={service.note} maxLength={140} placeholder={serviceHints[service.type].note} onChange={(note) => update(index, { note })} /></div>
       </div>}
     </div>)}
+  </div>;
+}
+
+function TestimonialsEditor({ profile, patch }: { profile: Profile; patch: (value: Partial<Profile>) => void }) {
+  const items = profile.testimonials;
+  const update = (index: number, value: Partial<Testimonial>) => { const testimonials = [...items]; testimonials[index] = { ...testimonials[index], ...value }; patch({ testimonials }); };
+  return <div className="editor-section">
+    <p className="muted">Short quotes from players you&apos;ve worked with. Only share words they&apos;re happy to see on your page.</p>
+    {items.map((item, index) => <div className="section-card" key={index}>
+      <div className="section-card-head"><strong>Quote {index + 1}</strong><button className="button small ghost" onClick={() => patch({ testimonials: items.filter((_, position) => position !== index) })}>Remove</button></div>
+      <label className="field"><span>What they said · {item.quote.length}/280</span><textarea rows={3} maxLength={280} value={item.quote} placeholder="Six weeks in and my second serve finally holds up in league matches." onChange={(event) => update(index, { quote: event.target.value })} /></label>
+      <div className="form-grid testimonial-meta"><Field label="Name" value={item.name} maxLength={60} placeholder="Jordan P." onChange={(name) => update(index, { name })} /><Field label="Context (optional)" value={item.context} maxLength={60} placeholder="4.0 league player" onChange={(context) => update(index, { context })} /></div>
+    </div>)}
+    {items.length < MAX_TESTIMONIALS ? <button className="button add-testimonial" onClick={() => patch({ testimonials: [...items, { quote: "", name: "", context: "" }] })}>+ Add a testimonial</button> : <p className="muted">That&apos;s the maximum of {MAX_TESTIMONIALS}. Remove one to add another.</p>}
   </div>;
 }

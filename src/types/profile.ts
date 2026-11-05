@@ -1,4 +1,4 @@
-export const BLOCKS = ["credentials", "services", "availability", "links"] as const;
+export const BLOCKS = ["credentials", "services", "testimonials", "availability", "links"] as const;
 export type BlockKey = (typeof BLOCKS)[number];
 export type ThemeKey = "centre" | "clay" | "hard" | "night";
 export const SPORTS = ["tennis", "pickleball", "padel"] as const;
@@ -20,6 +20,9 @@ export type Service = {
   /** Session length in minutes. */
   duration: number;
 };
+
+export const MAX_TESTIMONIALS = 3;
+export type Testimonial = { quote: string; name: string; context: string };
 
 export type AvailabilitySlot = { weekday: number; start: string };
 
@@ -47,6 +50,7 @@ export type Profile = {
   availability: AvailabilitySlot[];
   availabilityVisible: boolean;
   links: { instagram: string; youtube: string; website: string };
+  testimonials: Testimonial[];
   theme: ThemeKey;
   blockOrder: BlockKey[];
   hiddenBlocks: BlockKey[];

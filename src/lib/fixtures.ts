@@ -32,8 +32,12 @@ export const demoProfile: Profile = {
   ],
   availabilityVisible: true,
   links: { instagram: "https://instagram.com/", youtube: "https://youtube.com/", website: "" },
+  testimonials: [
+    { quote: "Six weeks with Alex and my second serve finally holds up in league matches.", name: "Jordan P.", context: "4.0 league player" },
+    { quote: "Hitting sessions are intense, organised and genuinely fun. My daughter asks to go every week.", name: "Sam R.", context: "Parent of a 14U player" }
+  ],
   theme: "centre",
-  blockOrder: ["credentials", "services", "availability", "links"],
+  blockOrder: ["credentials", "services", "testimonials", "availability", "links"],
   hiddenBlocks: []
 };
 
@@ -53,5 +57,6 @@ export const emptyProfile: Profile = {
   whatsapp: "",
   services: demoProfile.services.map((service) => ({ ...service, enabled: false, price: null, note: "", duration: 60 })),
   availability: [],
-  links: { instagram: "", youtube: "", website: "" }
+  links: { instagram: "", youtube: "", website: "" },
+  testimonials: []
 };

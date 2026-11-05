@@ -44,6 +44,7 @@ export function ProfileRenderer({ profile, preview = false }: { profile: Profile
   const hourly = priced.every((service) => service.duration === 60 && service.type !== "clinic");
   const hasCredentials = Boolean(profile.ratingValue || profile.playingBackground || profile.coachingExperience);
   const hasLinks = linkEntries(profile.links).length > 0;
+  const quotes = profile.testimonials.filter((item) => item.quote.trim());
   const available = profile.availabilityVisible && slots.length > 0;
   const days = orderOfPlay(slots, profile.timezone);
 
@@ -70,6 +71,13 @@ export function ProfileRenderer({ profile, preview = false }: { profile: Profile
         <span className="service-copy"><strong>{serviceName(item.type)}</strong>{item.note && <span className="muted">{item.note}</span>}</span>
         <span className="service-price">{item.price !== null ? <strong>{currency(profile.currency, item.price)}</strong> : <strong className="service-ask">Ask</strong>}<span className="meta">{item.type === "clinic" && item.price !== null ? "/ player · " : item.price !== null ? "/ " : ""}{item.duration} min</span></span>
       </button>)}</div>
+    </section>;
+    if (block === "testimonials" && quotes.length > 0) return <section className="card" key={block}>
+      <div className="card-label meta">Word from the court</div>
+      <div className="quote-list">{quotes.map((item, index) => <figure className="quote" key={index}>
+        <blockquote>{item.quote}</blockquote>
+        <figcaption>{item.name && <strong>{item.name}</strong>}{item.context && <span className="meta">{item.context}</span>}</figcaption>
+      </figure>)}</div>
     </section>;
     if (block === "availability" && available) return <section className="card" key={block}>
       <div className="card-head"><div className="card-label meta">Order of play</div><span className="meta tz">{profile.timezone.replace(/_/g, " ")}</span></div>

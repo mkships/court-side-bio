@@ -32,4 +32,18 @@ describe("normalizeProfile", () => {
   it("produces a publishable profile from a legacy payload", () => {
     expect(validateForPublish(normalizeProfile(legacy)).success).toBe(true);
   });
+
+  it("slots the testimonials block into an older lineup without reordering the creator's blocks", () => {
+    expect(normalizeProfile({ ...legacy, blockOrder: ["links", "credentials", "services", "availability"] }).blockOrder)
+      .toEqual(["links", "credentials", "services", "testimonials", "availability"]);
+    // Unknown and repeated keys are dropped before the missing blocks are filled in.
+    expect(normalizeProfile({ ...legacy, blockOrder: ["availability", "bogus", "availability"] }).blockOrder)
+      .toEqual(["credentials", "services", "testimonials", "availability", "links"]);
+  });
+
+  it("defaults testimonials to an empty list and drops unknown hidden blocks", () => {
+    const profile = normalizeProfile({ ...legacy, testimonials: undefined, hiddenBlocks: ["links", "nope"] });
+    expect(profile.testimonials).toEqual([]);
+    expect(profile.hiddenBlocks).toEqual(["links"]);
+  });
 });

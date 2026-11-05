@@ -2,7 +2,7 @@ import { validateForPublish } from "@/lib/validation/profile";
 import type { Profile } from "@/types/profile";
 
 /** Studio sections a checklist item can jump to. */
-export type HealthFocus = "identity" | "contact" | "credentials" | "services" | "availability" | "links" | "appearance";
+export type HealthFocus = "identity" | "contact" | "credentials" | "services" | "testimonials" | "availability" | "links" | "appearance";
 export type Blocker = { message: string; focus: HealthFocus };
 export type StrengthItem = { key: string; label: string; done: boolean; focus: HealthFocus };
 
@@ -11,6 +11,7 @@ const sectionFor = (path: readonly PropertyKey[]): HealthFocus => {
   if (key === "email" || key === "whatsapp") return "contact";
   if (["ratingSystem", "ratingValue", "ratingUrl", "playingBackground", "coachingExperience"].includes(key)) return "credentials";
   if (key === "services") return "services";
+  if (key === "testimonials") return "testimonials";
   if (["availability", "availabilityVisible", "timezone"].includes(key)) return "availability";
   if (key === "links") return "links";
   if (["theme", "blockOrder", "hiddenBlocks"].includes(key)) return "appearance";
@@ -37,6 +38,7 @@ export function strengthItems(profile: Profile): StrengthItem[] {
     { key: "bio", label: "Tell players about yourself", done: Boolean(profile.bio.trim()), focus: "identity" },
     { key: "rating", label: "Show your rating", done: Boolean(profile.ratingValue.trim()), focus: "credentials" },
     { key: "services", label: "Price at least one service", done: profile.services.some((service) => service.enabled && service.price !== null), focus: "services" },
+    { key: "testimonials", label: "Add a player testimonial", done: profile.testimonials.some((item) => item.quote.trim()), focus: "testimonials" },
     { key: "availability", label: "Set weekly court times", done: profile.availabilityVisible && profile.availability.length > 0, focus: "availability" },
     { key: "links", label: "Link Instagram, YouTube or a website", done: Object.values(profile.links).some(Boolean), focus: "links" }
   ];

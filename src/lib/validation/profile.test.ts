@@ -43,4 +43,24 @@ describe("profile validation", () => {
     expect(validateForPublish({ ...demoProfile, services: [{ ...demoProfile.services[0], duration: 5 }] }).success).toBe(false);
     expect(validateForPublish({ ...demoProfile, services: [demoProfile.services[0], demoProfile.services[0]] }).success).toBe(false);
   });
+
+  it("limits testimonials to three complete, short quotes", () => {
+    const quote = { quote: "Great coach.", name: "Jo", context: "" };
+    expect(validateForPublish({ ...demoProfile, testimonials: [quote, quote, quote] }).success).toBe(true);
+    expect(validateForPublish({ ...demoProfile, testimonials: [quote, quote, quote, quote] }).success).toBe(false);
+    expect(validateForPublish({ ...demoProfile, testimonials: [{ ...quote, quote: "x".repeat(281) }] }).success).toBe(false);
+    expect(validateForPublish({ ...demoProfile, testimonials: [{ ...quote, name: " " }] }).success).toBe(false);
+  });
+
+  it("reads profiles published before testimonials and the fifth block existed", () => {
+    const { testimonials: _testimonials, ...legacy } = demoProfile;
+    void _testimonials;
+    const result = validateForPublish({ ...legacy, blockOrder: ["credentials", "services", "availability", "links"] });
+    expect(result.success).toBe(true);
+    expect(result.data?.testimonials).toEqual([]);
+  });
+
+  it("rejects repeated blocks in the lineup", () => {
+    expect(validateForPublish({ ...demoProfile, blockOrder: ["services", "services"] }).success).toBe(false);
+  });
 });

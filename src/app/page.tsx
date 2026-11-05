@@ -86,7 +86,7 @@ export default function Home() {
       <div className="section-intro"><div className="meta">How it works</div><h2 id="how-title">Three points<br />to game.</h2></div>
       <ol className="score-list">
         <li><span className="score">15</span><div><h3>Claim your name</h3><p>Pick the username that goes in your Instagram bio, your WhatsApp status and your club noticeboard.</p></div></li>
-        <li><span className="score">30</span><div><h3>Build your page</h3><p>Sports, rating, services, rates and weekly court times. Choose a grass, clay, hard or night court theme.</p></div></li>
+        <li><span className="score">30</span><div><h3>Build your page</h3><p>Sports, rating, services, rates, weekly court times and player testimonials. Choose a grass, clay, hard or night court theme.</p></div></li>
         <li><span className="score">40</span><div><h3>Share one link</h3><p>Every introduction now lands on a page that is distinctly yours, with a one-tap way to reach you.</p></div></li>
         <li className="game"><span className="score">Game</span><div><h3>Get on court</h3><p>Players message you directly. You confirm the session your way.</p></div></li>
       </ol>
