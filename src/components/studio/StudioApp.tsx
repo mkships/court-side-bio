@@ -8,7 +8,8 @@ import { emailSchema, usernameSchema, validateForPublish, whatsappSchema } from 
 import { PhotoUpload } from "./PhotoUpload";
 import Image from "next/image";
 import { CourtLines, SportIcon } from "@/components/CourtArt";
-import { SPORTS, sportLabel, type BlockKey, type Profile, type Role, type Sport, type ThemeKey } from "@/types/profile";
+import { SESSION_LENGTHS, SPORTS, serviceName, sportLabel, type BlockKey, type Profile, type Role, type Service, type Sport, type ThemeKey } from "@/types/profile";
+import { normalizeProfile } from "@/lib/profiles/normalize";
 import { CLAIM_KEY, WORKSPACE_KEY, cleanUsername } from "@/lib/storageKeys";
 import { currencies, detectTimezone, groupedTimezones, timezoneLabel } from "@/lib/locale";
 import { publishBlockers, strengthItems, type HealthFocus } from "@/lib/profileHealth";
@@ -61,18 +62,18 @@ export function StudioApp() {
           ]);
           let loaded: Profile | null = null;
           if (remoteDraft?.payload) {
-            loaded = { ...emptyProfile, ...remoteDraft.payload } as Profile;
+            loaded = normalizeProfile(remoteDraft.payload);
             if (loaded.photoKey) {
               const { data: signed } = await client.storage.from("profile-photos").createSignedUrl(loaded.photoKey, 3600);
               loaded.photoUrl = signed?.signedUrl || "";
             }
           }
-          begin(loaded, (remotePublished?.payload as Profile) || null); return;
+          begin(loaded, remotePublished?.payload ? normalizeProfile(remotePublished.payload) : null); return;
         }
       }
-      let saved: { draft?: Partial<Profile>; published?: Profile | null } | null = null;
+      let saved: { draft?: Parameters<typeof normalizeProfile>[0]; published?: Parameters<typeof normalizeProfile>[0] | null } | null = null;
       try { saved = JSON.parse(localStorage.getItem(WORKSPACE_KEY) || "null"); } catch {}
-      begin(saved?.draft ? { ...emptyProfile, ...saved.draft } as Profile : null, saved?.published || null);
+      begin(saved?.draft ? normalizeProfile(saved.draft) : null, saved?.published ? normalizeProfile(saved.published) : null);
     })();
   }, [configured]);
   useEffect(() => { if (!ready) return; try { localStorage.setItem(WORKSPACE_KEY, JSON.stringify({ draft, published })); } catch {} }, [draft, published, ready]);
@@ -123,7 +124,7 @@ export function StudioApp() {
   if (!ready) return <div className="auth-page theme-centre"><CourtLines className="auth-court" /><div className="meta loading-call">Preparing your studio…</div></div>;
   if (onboardingStep > 0) return <Onboarding profile={draft} step={onboardingStep} setStep={setOnboardingStep} patch={patch} />;
 
-  const blockSummary = (key: BlockKey) => key === "credentials" ? (draft.ratingValue ? `${draft.ratingSystem} ${draft.ratingValue}` : "Add your background") : key === "services" ? `${draft.services.filter((item) => item.enabled).length} services enabled` : key === "availability" ? `${draft.availability.length} weekly slots` : `${Object.values(draft.links).filter(Boolean).length} links`;
+  const blockSummary = (key: BlockKey) => key === "credentials" ? (draft.ratingValue ? `${draft.ratingSystem} ${draft.ratingValue}` : "Add your background") : key === "services" ? servicesSummary(draft.services) : key === "availability" ? `${draft.availability.length} weekly slots` : `${Object.values(draft.links).filter(Boolean).length} links`;
   const status = !published ? "Not published" : dirty ? "Unpublished changes" : "Live";
   const statusTone = !published ? "off" : dirty ? "pending" : "live";
   const initials = draft.name.split(/\s+/).map((part) => part[0]).slice(0, 2).join("") || "?";
@@ -213,7 +214,7 @@ function EditorSection({ focus, profile, patch, toggleArray, toggleSlot, toggleB
   if (focus === "identity") return <div className="editor-section"><PhotoUpload profile={profile} patch={patch}/><div className="form-grid"><Field label="Full name" value={profile.name} onChange={(name)=>patch({name})}/><Field label="Location" value={profile.location} onChange={(location)=>patch({location})}/><label className="field"><span>Currency</span><select value={profile.currency} onChange={(e)=>patch({currency:e.target.value})}>{(currencies.includes(profile.currency) ? currencies : [profile.currency, ...currencies]).map(x=><option key={x}>{x}</option>)}</select></label></div><Field label="Headline" value={profile.headline} onChange={(headline)=>patch({headline})} maxLength={120}/><label className="field"><span>Bio · {profile.bio.length}/250</span><textarea rows={4} maxLength={250} value={profile.bio} onChange={(e)=>patch({bio:e.target.value})}/></label><div className="field"><label>Sports</label><div className="toggle-row">{SPORTS.map(x=><button key={x} className="toggle" aria-pressed={profile.sports.includes(x)} onClick={()=>toggleArray("sports",x)}><SportIcon sport={x} size={15}/>{sportLabel(x)}</button>)}</div></div><div className="field"><label>Roles</label><div className="toggle-row">{(["coach","hitting_partner"] as Role[]).map(x=><button key={x} className="toggle" aria-pressed={profile.roles.includes(x)} onClick={()=>toggleArray("roles",x)}>{x === "coach" ? "Coach" : "Hitting partner"}</button>)}</div></div></div>;
   if (focus === "contact") return <div className="editor-section"><p className="muted">At least one method is required to publish. These details appear only on the published snapshot.</p><Field label="WhatsApp · international format" value={profile.whatsapp} onChange={(whatsapp)=>patch({whatsapp})} placeholder="+14155550123"/><Field label="Contact email" value={profile.email} onChange={(email)=>patch({email})} type="email"/></div>;
   if (focus === "credentials") return <div className="editor-section"><div className="form-grid"><label className="field"><span>Rating system</span><select value={profile.ratingSystem} onChange={(e)=>patch({ratingSystem:e.target.value as Profile["ratingSystem"]})}>{["UTR","DUPR","NTRP","Playtomic","Other"].map(x=><option key={x}>{x}</option>)}</select></label><Field label="Rating · self-reported" value={profile.ratingValue} onChange={(ratingValue)=>patch({ratingValue})}/></div><Field label="Rating source URL" value={profile.ratingUrl} onChange={(ratingUrl)=>patch({ratingUrl})} placeholder="https://"/><label className="field"><span>Playing background</span><textarea rows={4} value={profile.playingBackground} onChange={(e)=>patch({playingBackground:e.target.value})}/></label><label className="field"><span>Coaching experience</span><textarea rows={4} value={profile.coachingExperience} onChange={(e)=>patch({coachingExperience:e.target.value})}/></label></div>;
-  if (focus === "services") return <div className="editor-section">{profile.services.map((service,index)=><div className="section-card" key={service.type}><div className="section-card-head"><strong>{service.type === "coaching" ? "Private coaching" : "Hitting sessions"}</strong><button className="toggle" aria-pressed={service.enabled} onClick={()=>{const services=[...profile.services];services[index]={...service,enabled:!service.enabled};patch({services});}}>{service.enabled ? "Enabled" : "Disabled"}</button></div>{service.enabled && <div className="form-grid" style={{marginTop:14}}><Field label={`Starting price (${profile.currency})`} value={service.price?.toString() || ""} type="number" onChange={(value)=>{const services=[...profile.services];services[index]={...service,price:value === "" ? null : Number(value)};patch({services});}}/><Field label="Short note" value={service.note} onChange={(note)=>{const services=[...profile.services];services[index]={...service,note};patch({services});}}/></div>}</div>)}</div>;
+  if (focus === "services") return <ServicesEditor profile={profile} patch={patch} />;
   if (focus === "availability") return <AvailabilityEditor profile={profile} patch={patch} toggleSlot={toggleSlot} />;
   if (focus === "links") return <div className="editor-section"><Field label="Instagram URL" value={profile.links.instagram} placeholder="https://" onChange={(instagram)=>patch({links:{...profile.links,instagram}})}/><Field label="YouTube URL" value={profile.links.youtube} placeholder="https://" onChange={(youtube)=>patch({links:{...profile.links,youtube}})}/><Field label="Website URL" value={profile.links.website} placeholder="https://" onChange={(website)=>patch({links:{...profile.links,website}})}/></div>;
   return <div className="editor-section"><div className="theme-picker">{themes.map(theme=><button key={theme.key} className="theme-option" aria-pressed={profile.theme===theme.key} onClick={()=>patch({theme:theme.key})}><span className={`theme-court theme-${theme.key}`} aria-hidden="true"><CourtLines sport={profile.sports[0]}/></span><strong>{theme.name}</strong></button>)}</div><h2 className="section-title">Arrange your blocks</h2>{profile.blockOrder.map((key)=><div className="section-card-head section-card" key={key}><strong>{labels[key]}</strong><button className="toggle" aria-pressed={!profile.hiddenBlocks.includes(key)} onClick={()=>toggleBlock(key)}>{profile.hiddenBlocks.includes(key)?"Hidden":"Shown"}</button></div>)}<p className="muted">Identity stays first and contact remains available. Empty blocks are automatically omitted.</p></div>;
@@ -259,5 +260,30 @@ function AvailabilityEditor({ profile, patch, toggleSlot }: { profile: Profile; 
         <div className="time-grid">{times.map(start=><button key={start} className="time" aria-pressed={profile.availability.some(slot=>slot.weekday===weekday&&slot.start===start)} onClick={()=>toggleSlot(weekday,start)}>{start}</button>)}</div>
       </div>;
     })}
+  </div>;
+}
+
+const servicesSummary = (services: Service[]) => {
+  const enabled = services.filter((service) => service.enabled);
+  return enabled.length ? enabled.map((service) => serviceName(service.type)).join(" · ") : "No services yet";
+};
+const serviceHints: Record<Service["type"], { title: string; note: string }> = {
+  coaching: { title: "Private coaching", note: "Technique, tactics and match preparation" },
+  hitting: { title: "Hitting sessions", note: "Live-ball practice for competitive players" },
+  clinic: { title: "Group clinics", note: "Saturday doubles drills · up to 6 players" }
+};
+
+function ServicesEditor({ profile, patch }: { profile: Profile; patch: (value: Partial<Profile>) => void }) {
+  const update = (index: number, value: Partial<Service>) => { const services = [...profile.services]; services[index] = { ...services[index], ...value }; patch({ services }); };
+  return <div className="editor-section">
+    <p className="muted">Prices are starting points shown on your page. Visitors still message you to confirm.</p>
+    {profile.services.map((service, index) => <div className="section-card" key={service.type}>
+      <div className="section-card-head"><strong>{serviceHints[service.type].title}</strong><button className="toggle" aria-pressed={service.enabled} onClick={() => update(index, { enabled: !service.enabled })}>{service.enabled ? "Offered" : "Not offered"}</button></div>
+      {service.enabled && <div className="service-fields">
+        <Field label={service.type === "clinic" ? `Price per player (${profile.currency})` : `Starting price (${profile.currency})`} value={service.price?.toString() || ""} type="number" placeholder="Leave blank to show “Ask”" onChange={(value) => update(index, { price: value === "" ? null : Math.max(0, Number(value)) })} />
+        <label className="field"><span>Session length</span><select value={service.duration} onChange={(event) => update(index, { duration: Number(event.target.value) })}>{(SESSION_LENGTHS as readonly number[]).includes(service.duration) ? null : <option value={service.duration}>{service.duration} min</option>}{SESSION_LENGTHS.map((minutes) => <option key={minutes} value={minutes}>{minutes} min</option>)}</select></label>
+        <div className="service-note"><Field label="Short note" value={service.note} maxLength={140} placeholder={serviceHints[service.type].note} onChange={(note) => update(index, { note })} /></div>
+      </div>}
+    </div>)}
   </div>;
 }

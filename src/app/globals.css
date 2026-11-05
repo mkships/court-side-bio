@@ -228,7 +228,8 @@ html[data-launched] .launch-screen { display: none; }
 .service-copy .muted { font-size: .82rem; }
 .service-price { flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 16px; border-left: 2px dashed var(--line); min-width: 92px; position: relative; }
 .service-price strong { font-family: var(--type-display); font-size: 1.6rem; line-height: 1; font-variant-numeric: tabular-nums; }
-.service-price .meta { color: var(--sub); font-size: .58rem; margin-top: 2px; }
+.service-price .meta { color: var(--sub); font-size: .58rem; margin-top: 3px; white-space: nowrap; }
+.service-price .service-ask { font-size: 1.25rem; text-transform: uppercase; }
 .service-ticket:hover { border-color: var(--ink); }
 .service-ticket:hover .service-price { background: var(--pop); color: var(--onPop); }
 
@@ -352,6 +353,9 @@ button.slot:hover { background: var(--pop); color: var(--onPop); border-color: t
 .section-card { border: 1px solid var(--line); background: var(--surface); padding: 16px; border-radius: var(--radius-md); }
 .section-card-head { display: flex; align-items: center; gap: 10px; }
 .section-card-head strong { margin-right: auto; }
+.service-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+.service-fields .field { margin: 0; }
+.service-note { grid-column: 1 / -1; }
 .day-row { display: grid; grid-template-columns: 130px 1fr; gap: 12px; align-items: start; }
 .day-head { display: grid; gap: 3px; justify-items: start; }
 .day-count { color: var(--sub); font-size: .6rem; }
@@ -449,6 +453,7 @@ button.slot:hover { background: var(--pop); color: var(--onPop); border-color: t
   .editor { padding: 16px 14px 110px; }
   .publish-bar { top: 74px; }
   .overview-pair, .form-grid { grid-template-columns: 1fr; }
+  .service-fields { grid-template-columns: 1fr 1fr; gap: 10px; }
   .day-row { grid-template-columns: 1fr; }
   .day-head { grid-template-columns: auto auto 1fr; align-items: baseline; gap: 4px 10px; }
   .day-actions { margin: 0; justify-self: end; }

@@ -4,12 +4,11 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { upcomingSlots } from "@/lib/availability";
-import { sportLabel, type BlockKey, type Profile, type UpcomingSlot } from "@/types/profile";
+import { serviceName, sportLabel, type BlockKey, type Profile, type ServiceType, type UpcomingSlot } from "@/types/profile";
 import { BallMark, CourtLines, LinkIcon, SportIcon } from "@/components/CourtArt";
 import { ContactSheet } from "./ContactSheet";
 
 const currency = (code: string, value: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: code, maximumFractionDigits: value % 1 ? 2 : 0 }).format(value);
-const serviceName = (type: "coaching" | "hitting") => type === "coaching" ? "Private coaching" : "Hitting session";
 const linkNames: Record<keyof Profile["links"], string> = { instagram: "Instagram", youtube: "YouTube", website: "Website" };
 const linkEntries = (links: Profile["links"]) => Object.entries(links).filter((entry): entry is [keyof Profile["links"], string] => Boolean(entry[1]));
 
@@ -32,15 +31,17 @@ const orderOfPlay = (slots: UpcomingSlot[], timezone: string) => {
 export function ProfileRenderer({ profile, preview = false }: { profile: Profile; preview?: boolean }) {
   const slots = useMemo(() => upcomingSlots(profile.availability, profile.timezone), [profile.availability, profile.timezone]);
   const [contactOpen, setContactOpen] = useState(false);
-  const [initialService, setInitialService] = useState<"coaching" | "hitting" | "">("");
+  const [initialService, setInitialService] = useState<ServiceType | "">("");
   const [initialSlot, setInitialSlot] = useState("");
-  const openContact = (service: "coaching" | "hitting" | "" = "", slot = "") => { setInitialService(service); setInitialSlot(slot); setContactOpen(true); };
+  const openContact = (service: ServiceType | "" = "", slot = "") => { setInitialService(service); setInitialSlot(slot); setContactOpen(true); };
   const firstName = profile.name.trim().split(/\s+/)[0] || "this coach";
   const initials = profile.name.split(/\s+/).map((part) => part[0]).slice(0, 2).join("") || "?";
   const roleLabels = profile.roles.map((role) => role === "coach" ? "Coach" : "Hitting partner");
   const shown = (block: BlockKey) => !profile.hiddenBlocks.includes(block);
   const enabledServices = profile.services.filter((service) => service.enabled);
-  const prices = enabledServices.map((service) => service.price).filter((price): price is number => price !== null);
+  const priced = enabledServices.filter((service) => service.price !== null);
+  const prices = priced.map((service) => service.price as number);
+  const hourly = priced.every((service) => service.duration === 60 && service.type !== "clinic");
   const hasCredentials = Boolean(profile.ratingValue || profile.playingBackground || profile.coachingExperience);
   const hasLinks = linkEntries(profile.links).length > 0;
   const available = profile.availabilityVisible && slots.length > 0;
@@ -48,7 +49,7 @@ export function ProfileRenderer({ profile, preview = false }: { profile: Profile
 
   const stats = [
     shown("credentials") && profile.ratingValue && { label: profile.ratingSystem === "Other" ? "Rating" : profile.ratingSystem, value: profile.ratingValue },
-    shown("services") && prices.length > 0 && { label: "From / hr", value: currency(profile.currency, Math.min(...prices)) },
+    shown("services") && prices.length > 0 && { label: hourly ? "From / hr" : "From / session", value: currency(profile.currency, Math.min(...prices)) },
     shown("availability") && available && { label: "Next open", value: `${days[0].day} ${days[0].slots[0].time.replace(":00", "")}` },
   ].filter((stat): stat is { label: string; value: string } => Boolean(stat));
 
@@ -67,7 +68,7 @@ export function ProfileRenderer({ profile, preview = false }: { profile: Profile
       <div className="card-label meta">Train with me</div>
       <div className="stack">{enabledServices.map((item) => <button className="service-ticket" onClick={() => openContact(item.type)} key={item.type}>
         <span className="service-copy"><strong>{serviceName(item.type)}</strong>{item.note && <span className="muted">{item.note}</span>}</span>
-        <span className="service-price">{item.price !== null ? <><strong>{currency(profile.currency, item.price)}</strong><span className="meta">/ hour</span></> : <span className="meta">Ask</span>}</span>
+        <span className="service-price">{item.price !== null ? <strong>{currency(profile.currency, item.price)}</strong> : <strong className="service-ask">Ask</strong>}<span className="meta">{item.type === "clinic" && item.price !== null ? "/ player · " : item.price !== null ? "/ " : ""}{item.duration} min</span></span>
       </button>)}</div>
     </section>;
     if (block === "availability" && available) return <section className="card" key={block}>

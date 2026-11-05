@@ -6,11 +6,19 @@ export type Sport = (typeof SPORTS)[number];
 export const sportLabel = (sport: Sport) => sport[0].toUpperCase() + sport.slice(1);
 export type Role = "coach" | "hitting_partner";
 
+export const SERVICE_TYPES = ["coaching", "hitting", "clinic"] as const;
+export type ServiceType = (typeof SERVICE_TYPES)[number];
+export const SESSION_LENGTHS = [30, 45, 60, 75, 90, 120] as const;
+export const serviceName = (type: ServiceType) => type === "coaching" ? "Private coaching" : type === "hitting" ? "Hitting session" : "Group clinic";
+
 export type Service = {
-  type: "coaching" | "hitting";
+  type: ServiceType;
   enabled: boolean;
+  /** Per session, or per player for group clinics. */
   price: number | null;
   note: string;
+  /** Session length in minutes. */
+  duration: number;
 };
 
 export type AvailabilitySlot = { weekday: number; start: string };

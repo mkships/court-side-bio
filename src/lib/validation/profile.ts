@@ -19,7 +19,13 @@ export const profileSchema = z.object({
   ratingSystem: z.enum(["UTR", "DUPR", "NTRP", "Playtomic", "Other"]), ratingValue: z.string().max(20, "Keep your rating under 20 characters"),
   ratingUrl: optionalUrl("Rating source must be a full https:// link"),
   playingBackground: z.string().max(500, "Keep your playing background under 500 characters"), coachingExperience: z.string().max(500, "Keep your coaching experience under 500 characters"),
-  services: z.array(z.object({ type: z.enum(["coaching", "hitting"]), enabled: z.boolean(), price: z.number().min(0, "Prices can't be negative").max(100000, "Prices must be under 100,000").nullable(), note: z.string().max(140, "Keep service notes under 140 characters") })),
+  services: z.array(z.object({
+    type: z.enum(["coaching", "hitting", "clinic"]), enabled: z.boolean(),
+    price: z.number().min(0, "Prices can't be negative").max(100000, "Prices must be under 100,000").nullable(),
+    note: z.string().max(140, "Keep service notes under 140 characters"),
+    // Profiles published before session lengths existed were hourly.
+    duration: z.number().int().min(15, "Sessions must be at least 15 minutes").max(240, "Sessions must be 4 hours or less").default(60)
+  })).refine((services) => new Set(services.map((service) => service.type)).size === services.length, "Each service can only appear once"),
   availability: z.array(z.object({ weekday: z.number().int().min(0).max(6), start: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/) })).refine((slots) => new Set(slots.map((slot) => `${slot.weekday}-${slot.start}`)).size === slots.length, "Duplicate availability slot"),
   availabilityVisible: z.boolean(),
   links: z.object({ instagram: optionalUrl("Instagram link must be a full https:// link"), youtube: optionalUrl("YouTube link must be a full https:// link"), website: optionalUrl("Website link must be a full https:// link") }),

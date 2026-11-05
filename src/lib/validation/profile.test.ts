@@ -31,4 +31,16 @@ describe("profile validation", () => {
     expect(whatsappSchema.safeParse("555-1234").success).toBe(false);
     expect(whatsappSchema.safeParse("+14155550123").success).toBe(true);
   });
+
+  it("reads services published before session lengths existed as hourly", () => {
+    const legacy = { ...demoProfile, services: [{ type: "coaching", enabled: true, price: 65, note: "" }] };
+    const result = validateForPublish(legacy);
+    expect(result.success).toBe(true);
+    expect(result.data?.services[0].duration).toBe(60);
+  });
+
+  it("rejects out-of-range session lengths and duplicate services", () => {
+    expect(validateForPublish({ ...demoProfile, services: [{ ...demoProfile.services[0], duration: 5 }] }).success).toBe(false);
+    expect(validateForPublish({ ...demoProfile, services: [demoProfile.services[0], demoProfile.services[0]] }).success).toBe(false);
+  });
 });
