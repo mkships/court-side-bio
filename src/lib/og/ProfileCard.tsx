@@ -6,10 +6,10 @@ import { serviceName, sportLabel, type Profile, type Sport, type ThemeKey } from
 export const ogSize = { width: 1200, height: 630 };
 const BALL = "#dcf04a";
 const palettes: Record<ThemeKey, { hero: string; runoff: string; ink: string; line: string; board: string }> = {
-  centre: { hero: "#1f5c3b", runoff: "#194d31", ink: "#f6f5ec", line: "rgba(255,255,255,0.5)", board: "#0f2a1e" },
-  clay: { hero: "#bf5a31", runoff: "#a84c27", ink: "#fff7ec", line: "rgba(255,255,255,0.62)", board: "#3a2920" },
-  hard: { hero: "#2a5ba8", runoff: "#3c7a5a", ink: "#f4f7fb", line: "rgba(255,255,255,0.7)", board: "#0f2240" },
-  night: { hero: "#1b4446", runoff: "#102b2d", ink: "#eef2ea", line: "rgba(220,240,74,0.45)", board: "#050b0d" }
+  centre: { hero: "#1f5c3b", runoff: "#194d31", ink: "#f6f5ec", line: "rgba(255,255,255,0.16)", board: "#0f2a1e" },
+  clay: { hero: "#bf5a31", runoff: "#a84c27", ink: "#fff7ec", line: "rgba(255,255,255,0.2)", board: "#3a2920" },
+  hard: { hero: "#2a5ba8", runoff: "#3c7a5a", ink: "#f4f7fb", line: "rgba(255,255,255,0.2)", board: "#0f2240" },
+  night: { hero: "#1b4446", runoff: "#102b2d", ink: "#eef2ea", line: "rgba(220,240,74,0.16)", board: "#050b0d" }
 };
 
 type Font = { name: string; data: ArrayBuffer; weight: 600 | 800; style: "normal" };
@@ -54,11 +54,10 @@ function Court({ sport, line, fill }: { sport: Sport; line: string; fill: string
   const court = courts[sport];
   const pad = court.width * 0.06;
   const viewWidth = court.width + pad * 2;
-  const stroke = (3 * viewWidth) / ogSize.width;
+  const stroke = (2.5 * viewWidth) / ogSize.width;
   return <svg width={ogSize.width} height={ogSize.height} viewBox={`${-pad} ${-pad} ${viewWidth} ${court.height + pad * 2}`} preserveAspectRatio="xMidYMid slice" style={{ position: "absolute", left: 0, top: 0 }}>
     <rect x={0} y={0} width={court.width} height={court.height} fill={fill} stroke={line} strokeWidth={stroke} />
     <path d={court.lines} fill="none" stroke={line} strokeWidth={stroke} />
-    <path d={`M${court.width / 2} ${-pad * 0.4}V${court.height + pad * 0.4}`} fill="none" stroke={line} strokeWidth={stroke} strokeDasharray={`${stroke * 2} ${stroke * 3}`} />
   </svg>;
 }
 

@@ -7,14 +7,18 @@ export const courts: Record<Sport, { width: number; height: number; lines: strin
   padel: { width: 20, height: 10, lines: "M3.05 0V10M16.95 0V10M3.05 5H16.95" },
 };
 
-export function CourtLines({ sport = "tennis", className = "" }: { sport?: Sport; className?: string }) {
+/**
+ * Court markings drawn as a background texture: faint lines, no net. Pass `detailed` for theme
+ * thumbnails, where the markings are the content and should read clearly.
+ */
+export function CourtLines({ sport = "tennis", className = "", detailed = false }: { sport?: Sport; className?: string; detailed?: boolean }) {
   const court = courts[sport];
   const pad = court.width * 0.06;
-  return <svg className={`court-lines ${className}`} viewBox={`${-pad} ${-pad} ${court.width + pad * 2} ${court.height + pad * 2}`} preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  return <svg className={`court-lines${detailed ? " court-lines-detailed" : ""} ${className}`} viewBox={`${-pad} ${-pad} ${court.width + pad * 2} ${court.height + pad * 2}`} preserveAspectRatio="xMidYMid slice" aria-hidden="true">
     <g fill="none" stroke="currentColor" strokeWidth="2" vectorEffect="non-scaling-stroke">
       <rect x="0" y="0" width={court.width} height={court.height} vectorEffect="non-scaling-stroke" />
       <path d={court.lines} vectorEffect="non-scaling-stroke" />
-      <path className="court-net" d={`M${court.width / 2} ${-pad * 0.4}V${court.height + pad * 0.4}`} strokeDasharray="2 3" vectorEffect="non-scaling-stroke" />
+      {detailed && <path className="court-net" d={`M${court.width / 2} ${-pad * 0.4}V${court.height + pad * 0.4}`} strokeDasharray="2 3" vectorEffect="non-scaling-stroke" />}
     </g>
   </svg>;
 }
