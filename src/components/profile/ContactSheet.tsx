@@ -10,7 +10,7 @@ export function ContactSheet({ profile, slots, open, onClose, initialService = "
   const [service, setService] = useState(initialService);
   const [slotIso, setSlotIso] = useState(initialSlot);
   const [note, setNote] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState<"" | "copied" | "failed">("");
   const closeRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLElement>(null);
   useEffect(() => { if (open) { setService(initialService); setSlotIso(initialSlot); setTimeout(() => closeRef.current?.focus(), 0); } }, [open, initialService, initialSlot]);
@@ -40,7 +40,7 @@ export function ContactSheet({ profile, slots, open, onClose, initialService = "
       <div className="dialog-actions">
         {links.whatsapp && <a className="button primary" href={links.whatsapp} target="_blank" rel="noopener noreferrer">Continue with WhatsApp ↗</a>}
         {links.email && <a className="button" href={links.email}>Continue with Email ↗</a>}
-        <button className="button ghost" onClick={async () => { await navigator.clipboard.writeText(message); setCopied(true); }}>{copied ? "Message copied" : "Copy message"}</button>
+        <button className="button ghost" onClick={async () => { try { await navigator.clipboard.writeText(message); setCopyState("copied"); } catch { setCopyState("failed"); } }}>{copyState === "copied" ? "Message copied" : copyState === "failed" ? "Copy failed — select the text manually" : "Copy message"}</button>
       </div>
       <p className="fineprint">This sends a preferred-time inquiry in your chosen app. Nothing is booked until {profile.name.split(" ")[0]} confirms it.</p>
     </section>

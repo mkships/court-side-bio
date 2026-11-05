@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { BallMark } from "@/components/CourtArt";
+import { LAUNCH_KEY } from "@/lib/storageKeys";
 
 export function LaunchScreen() {
   const [leaving, setLeaving] = useState(false);
@@ -11,12 +12,13 @@ export function LaunchScreen() {
     let leaveTimer: ReturnType<typeof setTimeout>;
     let removeTimer: ReturnType<typeof setTimeout>;
     const startedAt = performance.now();
+    try { sessionStorage.setItem(LAUNCH_KEY, "1"); } catch {}
 
     const finish = () => {
       const remaining = Math.max(0, 520 - (performance.now() - startedAt));
       leaveTimer = setTimeout(() => {
         setLeaving(true);
-        removeTimer = setTimeout(() => setVisible(false), 700);
+        removeTimer = setTimeout(() => { setVisible(false); document.documentElement.dataset.launched = "1"; }, 700);
       }, remaining);
     };
 

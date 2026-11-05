@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
 import { LaunchScreen } from "@/components/LaunchScreen";
+import { ClaimForm } from "@/components/ClaimForm";
 import { BallMark, CourtLines, SportIcon } from "@/components/CourtArt";
 import { SPORTS, sportLabel, type Sport, type ThemeKey } from "@/types/profile";
 
@@ -37,7 +38,7 @@ export default function Home() {
           <div className="eyebrow meta"><span className="live-dot" /> Link-in-bio for racket sport pros</div>
           <h1 aria-label="Your court. Your page."><span>Your court.</span><span className="hl">Your page.</span></h1>
           <p className="lede">One link for tennis, pickleball and padel coaches and hitting partners. Your rating, your rates and your weekly court times, with a direct line to you.</p>
-          <Link href="/signup" className="claim-bar"><span className="claim-domain">courtsidebio.com/</span><span className="claim-name">yourname</span><span className="claim-go">Claim it →</span></Link>
+          <ClaimForm />
           <div className="hero-sub">
             <span className="sport-badges">{SPORTS.map((sport) => <span className="sport-badge" key={sport}><SportIcon sport={sport} size={14} />{sportLabel(sport)}</span>)}</span>
             <Link href="/demo" className="text-link">See a live example ↗</Link>
