@@ -2,15 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { contactLinks, inquiryMessage } from "@/lib/contact";
-import type { Profile, UpcomingSlot } from "@/types/profile";
+import { serviceName, type Profile, type ServiceType, type UpcomingSlot } from "@/types/profile";
 
-type Props = { profile: Profile; slots: UpcomingSlot[]; open: boolean; onClose: () => void; initialService?: "coaching" | "hitting" | ""; initialSlot?: string };
+type Props = { profile: Profile; slots: UpcomingSlot[]; open: boolean; onClose: () => void; initialService?: ServiceType | ""; initialSlot?: string };
 
 export function ContactSheet({ profile, slots, open, onClose, initialService = "", initialSlot = "" }: Props) {
-  const [service, setService] = useState(initialService);
+  const [service, setService] = useState<ServiceType | "">(initialService);
   const [slotIso, setSlotIso] = useState(initialSlot);
   const [note, setNote] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState<"" | "copied" | "failed">("");
   const closeRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLElement>(null);
   useEffect(() => { if (open) { setService(initialService); setSlotIso(initialSlot); setTimeout(() => closeRef.current?.focus(), 0); } }, [open, initialService, initialSlot]);
@@ -33,14 +33,14 @@ export function ContactSheet({ profile, slots, open, onClose, initialService = "
       <div className="dialog-head"><h2 id="contact-title">Contact {profile.name.split(" ")[0]}</h2><button ref={closeRef} className="icon-button" onClick={onClose} aria-label="Close contact form">×</button></div>
       {enabledServices.length > 0 && <fieldset className="field"><legend>What are you looking for?</legend><div className="radio-list">
         <label className="radio-option"><input type="radio" name="service" checked={!service} onChange={() => setService("")} /> General training inquiry</label>
-        {enabledServices.map((item) => <label className="radio-option" key={item.type}><input type="radio" name="service" checked={service === item.type} onChange={() => setService(item.type)} />{item.type === "coaching" ? "Private coaching" : "Hitting session"}</label>)}
+        {enabledServices.map((item) => <label className="radio-option" key={item.type}><input type="radio" name="service" checked={service === item.type} onChange={() => setService(item.type)} />{serviceName(item.type)}</label>)}
       </div></fieldset>}
       {slots.length > 0 && <div className="field"><label htmlFor="preferred-slot">Preferred time <span className="muted">(optional)</span></label><select id="preferred-slot" value={slotIso} onChange={(event) => setSlotIso(event.target.value)}><option value="">No preferred time</option>{slots.map((slot) => <option key={slot.iso} value={slot.iso}>{slot.label}</option>)}</select></div>}
       <div className="field"><label htmlFor="visitor-note">Additional message <span className="muted">(optional)</span></label><textarea id="visitor-note" rows={3} maxLength={500} value={note} onChange={(event) => setNote(event.target.value)} placeholder="Anything useful for the coach to know" /></div>
       <div className="dialog-actions">
         {links.whatsapp && <a className="button primary" href={links.whatsapp} target="_blank" rel="noopener noreferrer">Continue with WhatsApp ↗</a>}
         {links.email && <a className="button" href={links.email}>Continue with Email ↗</a>}
-        <button className="button ghost" onClick={async () => { await navigator.clipboard.writeText(message); setCopied(true); }}>{copied ? "Message copied" : "Copy message"}</button>
+        <button className="button ghost" onClick={async () => { try { await navigator.clipboard.writeText(message); setCopyState("copied"); } catch { setCopyState("failed"); } }}>{copyState === "copied" ? "Message copied" : copyState === "failed" ? "Copy failed — select the text manually" : "Copy message"}</button>
       </div>
       <p className="fineprint">This sends a preferred-time inquiry in your chosen app. Nothing is booked until {profile.name.split(" ")[0]} confirms it.</p>
     </section>

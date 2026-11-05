@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
 import { LaunchScreen } from "@/components/LaunchScreen";
+import { ClaimForm } from "@/components/ClaimForm";
 import { BallMark, CourtLines, SportIcon } from "@/components/CourtArt";
 import { SPORTS, sportLabel, type Sport, type ThemeKey } from "@/types/profile";
 
@@ -37,7 +38,7 @@ export default function Home() {
           <div className="eyebrow meta"><span className="live-dot" /> Link-in-bio for racket sport pros</div>
           <h1 aria-label="Your court. Your page."><span>Your court.</span><span className="hl">Your page.</span></h1>
           <p className="lede">One link for tennis, pickleball and padel coaches and hitting partners. Your rating, your rates and your weekly court times, with a direct line to you.</p>
-          <Link href="/signup" className="claim-bar"><span className="claim-domain">courtsidebio.com/</span><span className="claim-name">yourname</span><span className="claim-go">Claim it →</span></Link>
+          <ClaimForm />
           <div className="hero-sub">
             <span className="sport-badges">{SPORTS.map((sport) => <span className="sport-badge" key={sport}><SportIcon sport={sport} size={14} />{sportLabel(sport)}</span>)}</span>
             <Link href="/demo" className="text-link">See a live example ↗</Link>
@@ -85,7 +86,7 @@ export default function Home() {
       <div className="section-intro"><div className="meta">How it works</div><h2 id="how-title">Three points<br />to game.</h2></div>
       <ol className="score-list">
         <li><span className="score">15</span><div><h3>Claim your name</h3><p>Pick the username that goes in your Instagram bio, your WhatsApp status and your club noticeboard.</p></div></li>
-        <li><span className="score">30</span><div><h3>Build your page</h3><p>Sports, rating, services, rates and weekly court times. Choose a grass, clay, hard or night court theme.</p></div></li>
+        <li><span className="score">30</span><div><h3>Build your page</h3><p>Sports, rating, services, rates, weekly court times and player testimonials. Choose a grass, clay, hard or night court theme.</p></div></li>
         <li><span className="score">40</span><div><h3>Share one link</h3><p>Every introduction now lands on a page that is distinctly yours, with a one-tap way to reach you.</p></div></li>
         <li className="game"><span className="score">Game</span><div><h3>Get on court</h3><p>Players message you directly. You confirm the session your way.</p></div></li>
       </ol>
