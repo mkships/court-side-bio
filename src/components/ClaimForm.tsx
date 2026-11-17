@@ -17,6 +17,6 @@ export function ClaimForm() {
   return <form className="claim-bar" onSubmit={submit}>
     <span className="claim-domain" aria-hidden="true">courtsidebio.com/</span>
     <input className="claim-name" value={username} onChange={(event) => setUsername(cleanUsername(event.target.value))} placeholder="yourname" aria-label="Choose your courtsidebio username" autoComplete="off" autoCapitalize="none" spellCheck={false} maxLength={24} />
-    <button className="claim-go" type="submit">Claim it →</button>
+    <button className="claim-go" type="submit">Claim my page</button>
   </form>;
 }

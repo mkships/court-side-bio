@@ -38,8 +38,8 @@ export function ContactSheet({ profile, slots, open, onClose, initialService = "
       {slots.length > 0 && <div className="field"><label htmlFor="preferred-slot">Preferred time <span className="muted">(optional)</span></label><select id="preferred-slot" value={slotIso} onChange={(event) => setSlotIso(event.target.value)}><option value="">No preferred time</option>{slots.map((slot) => <option key={slot.iso} value={slot.iso}>{slot.label}</option>)}</select></div>}
       <div className="field"><label htmlFor="visitor-note">Additional message <span className="muted">(optional)</span></label><textarea id="visitor-note" rows={3} maxLength={500} value={note} onChange={(event) => setNote(event.target.value)} placeholder="Anything useful for the coach to know" /></div>
       <div className="dialog-actions">
-        {links.whatsapp && <a className="button primary" href={links.whatsapp} target="_blank" rel="noopener noreferrer">Continue with WhatsApp ↗</a>}
-        {links.email && <a className="button" href={links.email}>Continue with Email ↗</a>}
+        {links.whatsapp && <a className="button primary" href={links.whatsapp} target="_blank" rel="noopener noreferrer">Continue with WhatsApp</a>}
+        {links.email && <a className="button" href={links.email}>Continue with Email</a>}
         <button className="button ghost" onClick={async () => { try { await navigator.clipboard.writeText(message); setCopyState("copied"); } catch { setCopyState("failed"); } }}>{copyState === "copied" ? "Message copied" : copyState === "failed" ? "Copy failed — select the text manually" : "Copy message"}</button>
       </div>
       <p className="fineprint">This sends a preferred-time inquiry in your chosen app. Nothing is booked until {profile.name.split(" ")[0]} confirms it.</p>
