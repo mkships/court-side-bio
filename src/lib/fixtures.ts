@@ -21,8 +21,9 @@ export const demoProfile: Profile = {
   playingBackground: "Former NCAA Division II player and conference finalist.",
   coachingExperience: "Six years coaching juniors and adult competitors.",
   services: [
-    { type: "coaching", enabled: true, price: 65, note: "Technique, tactics and match preparation" },
-    { type: "hitting", enabled: true, price: 45, note: "High-intensity live-ball practice" }
+    { type: "coaching", enabled: true, price: 65, note: "Technique, tactics and match preparation", duration: 60 },
+    { type: "hitting", enabled: true, price: 45, note: "High-intensity live-ball practice", duration: 60 },
+    { type: "clinic", enabled: true, price: 30, note: "Saturday doubles drills · up to 6 players", duration: 90 }
   ],
   availability: [
     { weekday: 2, start: "18:00" },
@@ -31,8 +32,12 @@ export const demoProfile: Profile = {
   ],
   availabilityVisible: true,
   links: { instagram: "https://instagram.com/", youtube: "https://youtube.com/", website: "" },
+  testimonials: [
+    { quote: "Six weeks with Alex and my second serve finally holds up in league matches.", name: "Jordan P.", context: "4.0 league player" },
+    { quote: "Hitting sessions are intense, organised and genuinely fun. My daughter asks to go every week.", name: "Sam R.", context: "Parent of a 14U player" }
+  ],
   theme: "centre",
-  blockOrder: ["credentials", "services", "availability", "links"],
+  blockOrder: ["credentials", "services", "testimonials", "availability", "links"],
   hiddenBlocks: []
 };
 
@@ -50,7 +55,8 @@ export const emptyProfile: Profile = {
   coachingExperience: "",
   email: "",
   whatsapp: "",
-  services: demoProfile.services.map((service) => ({ ...service, enabled: false, price: null, note: "" })),
+  services: demoProfile.services.map((service) => ({ ...service, enabled: false, price: null, note: "", duration: 60 })),
   availability: [],
-  links: { instagram: "", youtube: "", website: "" }
+  links: { instagram: "", youtube: "", website: "" },
+  testimonials: []
 };

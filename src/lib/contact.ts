@@ -1,8 +1,10 @@
-import type { Profile, UpcomingSlot } from "@/types/profile";
+import type { Profile, ServiceType, UpcomingSlot } from "@/types/profile";
 
-export function inquiryMessage(profile: Profile, service?: "coaching" | "hitting" | "", slot?: UpcomingSlot, note?: string) {
+const interests: Record<ServiceType, string> = { coaching: "private coaching", hitting: "a hitting session", clinic: "a group clinic" };
+
+export function inquiryMessage(profile: Profile, service?: ServiceType | "", slot?: UpcomingSlot, note?: string) {
   const first = profile.name.trim().split(/\s+/)[0] || "there";
-  const interest = service === "coaching" ? "private coaching" : service === "hitting" ? "a hitting session" : "training";
+  const interest = service ? interests[service] : "training";
   return [`Hi ${first}, I found your profile and am interested in ${interest}${slot ? ` on ${slot.label}` : ""}.`, "Are you available?", note?.trim()].filter(Boolean).join("\n");
 }
 

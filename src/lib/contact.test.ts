@@ -9,6 +9,10 @@ describe("contact helpers", () => {
     expect(message).toContain("I am preparing for a league match.");
   });
 
+  it("names group clinics in the inquiry", () => {
+    expect(inquiryMessage(demoProfile, "clinic")).toContain("interested in a group clinic.");
+  });
+
   it("normalizes WhatsApp and encodes outbound content", () => {
     const links = contactLinks({ ...demoProfile, whatsapp: "+1 (512) 555-0142" }, "Hello & welcome");
     expect(links.whatsapp).toBe("https://wa.me/15125550142?text=Hello%20%26%20welcome");
