@@ -1,15 +1,13 @@
 import Link from "next/link";
-import { BallMark, CourtLines } from "@/components/CourtArt";
+import { BallMark } from "@/components/CourtArt";
 
 export function OutOfBounds() {
-  return <main className="auth-page theme-centre">
-    <CourtLines className="auth-court" />
-    <section className="auth-card out-card">
-      <div className="line-call" aria-hidden="true"><span className="line-call-line" /><BallMark size={34} /></div>
-      <div className="meta">404 · Line call</div>
-      <h1>Out.</h1>
-      <p className="muted">This page isn’t available. The profile may be unpublished, deleted, or the link may be incorrect.</p>
-      <Link href="/" className="button primary">Back to courtsidebio</Link>
+  return <main className="auth-page">
+    <section className="auth-card">
+      <BallMark size={36} />
+      <h1 style={{ marginTop: 20 }}>This page isn’t available</h1>
+      <p className="muted">The profile may be unpublished or deleted, or the link may be wrong.</p>
+      <Link href="/" className="button primary block">Go to courtsidebio</Link>
     </section>
   </main>;
 }

@@ -42,15 +42,14 @@ export function SiteHeader({ studio = false }: { studio?: boolean }) {
 
   return <header className={`site-header${hidden ? " is-hidden" : ""}`}>
     <Link href="/" className="brand" aria-label="courtsidebio home"><BallMark size={26} /><span>courtsidebio</span></Link>
-    <span className="meta hide-mobile header-tag">Tennis · Pickleball · Padel</span>
     <span className="nav-spacer" />
     {studio ? <>
-      <Link className="button small ghost hide-mobile" href="/demo">View demo page ↗</Link>
+      <Link className="button small ghost hide-mobile" href="/demo">View demo page</Link>
       <StudioAccountAction />
     </> : <>
       <Link className="button small ghost hide-mobile" href="/demo">View demo</Link>
       <Link className="button small ghost" href="/login">Sign in</Link>
-      <Link className="button small primary" href="/signup">Build my page</Link>
+      <Link className="button small primary" href="/signup">Get started</Link>
     </>}
   </header>;
 }

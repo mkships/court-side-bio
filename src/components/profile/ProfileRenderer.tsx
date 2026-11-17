@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { upcomingSlots } from "@/lib/availability";
 import { serviceName, sportLabel, type BlockKey, type Profile, type ServiceType, type UpcomingSlot } from "@/types/profile";
-import { BallMark, CourtLines, LinkIcon, SportIcon } from "@/components/CourtArt";
+import { BallMark, LinkIcon, SportIcon } from "@/components/CourtArt";
 import { ContactSheet } from "./ContactSheet";
 import { ShareButton } from "./ShareButton";
 
@@ -13,7 +13,7 @@ const currency = (code: string, value: number) => new Intl.NumberFormat("en-US",
 const linkNames: Record<keyof Profile["links"], string> = { instagram: "Instagram", youtube: "YouTube", website: "Website" };
 const linkEntries = (links: Profile["links"]) => Object.entries(links).filter((entry): entry is [keyof Profile["links"], string] => Boolean(entry[1]));
 
-// Groups upcoming slots into an "order of play": one row per calendar day in the creator's timezone.
+// Groups upcoming slots into one row per calendar day in the creator's timezone.
 const orderOfPlay = (slots: UpcomingSlot[], timezone: string) => {
   const day = new Intl.DateTimeFormat("en-US", { timeZone: timezone, weekday: "short" });
   const date = new Intl.DateTimeFormat("en-US", { timeZone: timezone, month: "short", day: "numeric" });
@@ -29,6 +29,10 @@ const orderOfPlay = (slots: UpcomingSlot[], timezone: string) => {
   return rows;
 };
 
+/**
+ * A coach's public page, laid out like a creator link-in-bio page: full-bleed theme colour,
+ * centred identity, stat chips, full-width lesson buttons and a sticky message button.
+ */
 export function ProfileRenderer({ profile, preview = false }: { profile: Profile; preview?: boolean }) {
   const slots = useMemo(() => upcomingSlots(profile.availability, profile.timezone), [profile.availability, profile.timezone]);
   const [contactOpen, setContactOpen] = useState(false);
@@ -44,90 +48,76 @@ export function ProfileRenderer({ profile, preview = false }: { profile: Profile
   const prices = priced.map((service) => service.price as number);
   const hourly = priced.every((service) => service.duration === 60 && service.type !== "clinic");
   const hasCredentials = Boolean(profile.ratingValue || profile.playingBackground || profile.coachingExperience);
-  const hasLinks = linkEntries(profile.links).length > 0;
+  const links = shown("links") ? linkEntries(profile.links) : [];
   const quotes = profile.testimonials.filter((item) => item.quote.trim());
   const available = profile.availabilityVisible && slots.length > 0;
   const days = orderOfPlay(slots, profile.timezone);
 
   const stats = [
     shown("credentials") && profile.ratingValue && { label: profile.ratingSystem === "Other" ? "Rating" : profile.ratingSystem, value: profile.ratingValue },
-    shown("services") && prices.length > 0 && { label: hourly ? "From / hr" : "From / session", value: currency(profile.currency, Math.min(...prices)) },
+    shown("services") && prices.length > 0 && { label: hourly ? "From / hr" : "From", value: currency(profile.currency, Math.min(...prices)) },
     shown("availability") && available && { label: "Next open", value: `${days[0].day} ${days[0].slots[0].time.replace(":00", "")}` },
   ].filter((stat): stat is { label: string; value: string } => Boolean(stat));
 
   const renderBlock = (block: BlockKey) => {
     if (!shown(block)) return null;
-    if (block === "credentials" && hasCredentials) return <section className="card" key={block}>
-      <div className="card-label meta">Credentials</div>
-      {profile.ratingValue && <div className="rating-row">
-        <span className="rating-badge"><span className="meta">{profile.ratingSystem}</span><strong>{profile.ratingValue}</strong></span>
-        <span className="muted">Self-reported rating{profile.ratingUrl && <> · <a href={profile.ratingUrl} target="_blank" rel="noopener noreferrer">View source ↗</a></>}</span>
-      </div>}
-      {profile.playingBackground && <div className="credential"><div className="meta">Playing</div><p>{profile.playingBackground}</p></div>}
-      {profile.coachingExperience && <div className="credential"><div className="meta">Coaching</div><p>{profile.coachingExperience}</p></div>}
+    if (block === "services" && enabledServices.length > 0) return <section className="stack" key={block} aria-labelledby="lessons-title">
+      <h2 className="block-title" id="lessons-title">Lessons</h2>
+      {enabledServices.map((item) => <button className="link-button lesson" onClick={() => openContact(item.type)} key={item.type}>
+        <span className="lesson-copy"><span>{serviceName(item.type)}</span>{item.note && <small>{item.note}</small>}</span>
+        <span className="lesson-price">{item.price !== null ? <strong>{currency(profile.currency, item.price)}</strong> : <strong>Ask</strong>}<small>{item.type === "clinic" && item.price !== null ? "per player · " : ""}{item.duration} min</small></span>
+      </button>)}
     </section>;
-    if (block === "services" && enabledServices.length > 0) return <section className="card" key={block}>
-      <div className="card-label meta">Train with me</div>
-      <div className="stack">{enabledServices.map((item) => <button className="service-ticket" onClick={() => openContact(item.type)} key={item.type}>
-        <span className="service-copy"><strong>{serviceName(item.type)}</strong>{item.note && <span className="muted">{item.note}</span>}</span>
-        <span className="service-price">{item.price !== null ? <strong>{currency(profile.currency, item.price)}</strong> : <strong className="service-ask">Ask</strong>}<span className="meta">{item.type === "clinic" && item.price !== null ? "/ player · " : item.price !== null ? "/ " : ""}{item.duration} min</span></span>
-      </button>)}</div>
+    if (block === "availability" && available) return <section className="stack" key={block} aria-labelledby="times-title">
+      <h2 className="block-title" id="times-title">Court times</h2>
+      <div className="card">
+        <div className="card-head"><p className="card-label">Tap a time to ask for it</p><span className="tz">{profile.timezone.replace(/_/g, " ")}</span></div>
+        <ol className="order-of-play">{days.map((row, rowIndex) => <li key={row.key}>
+          <span className="oop-day"><strong>{row.day}</strong><span className="meta">{row.date}</span></span>
+          <span className="oop-slots">{row.slots.map((slot, slotIndex) => <button className={`slot${rowIndex === 0 && slotIndex === 0 ? " is-next" : ""}`} key={slot.iso} onClick={() => openContact("", slot.iso)} aria-label={`Ask about ${slot.label}`}>{slot.time}</button>)}</span>
+        </li>)}</ol>
+      </div>
     </section>;
-    if (block === "testimonials" && quotes.length > 0) return <section className="card" key={block}>
-      <div className="card-label meta">Word from the court</div>
+    if (block === "credentials" && hasCredentials) return <section className="stack" key={block} aria-labelledby="background-title">
+      <h2 className="block-title" id="background-title">Background</h2>
+      <div className="card">
+        {profile.ratingValue && <div className="rating-row">
+          <span className="rating-badge"><span>{profile.ratingSystem}</span>{profile.ratingValue}</span>
+          <span className="muted">Self-reported{profile.ratingUrl && <> · <a href={profile.ratingUrl} target="_blank" rel="noopener noreferrer">View source</a></>}</span>
+        </div>}
+        {profile.playingBackground && <div className="credential"><div className="meta">Playing</div><p>{profile.playingBackground}</p></div>}
+        {profile.coachingExperience && <div className="credential"><div className="meta">Coaching</div><p>{profile.coachingExperience}</p></div>}
+      </div>
+    </section>;
+    if (block === "testimonials" && quotes.length > 0) return <section className="stack" key={block} aria-labelledby="reviews-title">
+      <h2 className="block-title" id="reviews-title">What players say</h2>
       <div className="quote-list">{quotes.map((item, index) => <figure className="quote" key={index}>
         <blockquote>{item.quote}</blockquote>
         <figcaption>{item.name && <strong>{item.name}</strong>}{item.context && <span className="meta">{item.context}</span>}</figcaption>
       </figure>)}</div>
-    </section>;
-    if (block === "availability" && available) return <section className="card" key={block}>
-      <div className="card-head"><div className="card-label meta">Order of play</div><span className="meta tz">{profile.timezone.replace(/_/g, " ")}</span></div>
-      <ol className="order-of-play">{days.map((row) => <li key={row.key}>
-        <span className="oop-day"><strong>{row.day}</strong><span className="meta">{row.date}</span></span>
-        <span className="oop-slots">{row.slots.map((slot) => <button className="slot" key={slot.iso} onClick={() => openContact("", slot.iso)} aria-label={`Ask about ${slot.label}`}>{slot.time}</button>)}</span>
-      </li>)}</ol>
-      <p className="fineprint">Recurring 60-minute windows. Tapping a time starts an inquiry, not a booking.</p>
-    </section>;
-    if (block === "links" && hasLinks) return <section className="card" key={block}>
-      <div className="card-label meta">Follow along</div>
-      <div className="link-list">{linkEntries(profile.links).map(([key, url]) => <a className="link-tile" href={url} target="_blank" rel="noopener noreferrer" key={key}><LinkIcon kind={key} /><span>{linkNames[key]}</span><span aria-hidden="true">↗</span></a>)}</div>
     </section>;
     return null;
   };
 
   return <div className={`shell profile-shell theme-${profile.theme}`}>
     <main className="profile-stage">
-      {preview && <div className="preview-flag meta">Draft preview</div>}
-      <section className="profile-hero">
-        <CourtLines sport={profile.sports[0]} className="profile-court" />
-        <div className="profile-topline">
-          <span className="sport-badges">{profile.sports.map((sport) => <span className="sport-badge" key={sport}><SportIcon sport={sport} size={14} />{sportLabel(sport)}</span>)}</span>
-          <span className="topline-actions">
-            {!preview && <ShareButton title={`${profile.name} on courtsidebio`} />}
-            <button className="button small" onClick={() => openContact()} aria-label={`Contact ${firstName}`}>Contact ↗</button>
-          </span>
-        </div>
+      {preview && <div className="preview-flag">Draft preview</div>}
+      <div className="profile-topbar">
+        <span className="sport-badges">{profile.sports.map((sport) => <span className="sport-badge" key={sport}><SportIcon sport={sport} size={14} />{sportLabel(sport)}</span>)}</span>
+        {!preview && <ShareButton title={`${profile.name} on courtsidebio`} />}
+      </div>
+      <header className="profile-head">
         <div className="avatar">{profile.photoUrl ? <Image src={profile.photoUrl} alt={`${profile.name} portrait`} width={240} height={240} unoptimized /> : <span>{initials}</span>}</div>
         <h1>{profile.name || "Your name"}</h1>
         {profile.headline && <p className="profile-headline">{profile.headline}</p>}
-        <div className="profile-meta">
-          {roleLabels.map((tag) => <span className="chip" key={tag}>{tag}</span>)}
-          {profile.location && <span className="profile-location meta">◉ {profile.location}</span>}
-        </div>
-      </section>
-      {stats.length > 0 && <dl className="scoreboard" style={{ gridTemplateColumns: `repeat(${stats.length}, 1fr)` }}>
-        {stats.map((stat) => <div key={stat.label}><dt className="meta">{stat.label}</dt><dd>{stat.value}</dd></div>)}
-      </dl>}
-      {profile.bio && <section className="card"><div className="card-label meta">About</div><p className="bio">{profile.bio}</p></section>}
+        <p className="profile-meta">{[roleLabels.join(" & "), profile.location].filter(Boolean).join(" · ")}</p>
+        {links.length > 0 && <div className="social-row">{links.map(([key, url]) => <a href={url} target="_blank" rel="noopener noreferrer" key={key} aria-label={linkNames[key]}><LinkIcon kind={key} /></a>)}</div>}
+      </header>
+      {stats.length > 0 && <dl className="stat-row">{stats.map((stat) => <div className="stat" key={stat.label}><dt>{stat.label}</dt><dd>{stat.value}</dd></div>)}</dl>}
+      {profile.bio && <section className="card"><p className="card-label">About</p><p className="bio">{profile.bio}</p></section>}
       {profile.blockOrder.map(renderBlock)}
-      <section className="match-point">
-        <span className="match-ball"><BallMark size={128} /></span>
-        <div className="meta">Match point</div>
-        <h2>Ready to get on court with {firstName}?</h2>
-        <p>No visitor account, no booking fee. Just a prefilled message.</p>
-        <button className="button primary" onClick={() => openContact()}>Contact {firstName} ↗</button>
-      </section>
-      <footer className="made-with meta">{preview ? <span className="made-with-link"><BallMark size={16} /> Made with courtsidebio</span> : <Link href="/" className="made-with-link"><BallMark size={16} /> Made with courtsidebio</Link>}</footer>
+      {preview ? <span className="made-with"><BallMark size={16} />courtsidebio</span> : <Link href="/" className="made-with"><BallMark size={16} />Make your own on courtsidebio</Link>}
+      <div className="sticky-cta"><button className="link-button" onClick={() => openContact()}>Message {firstName}</button></div>
     </main>
     <ContactSheet profile={profile} slots={slots} open={contactOpen} onClose={() => setContactOpen(false)} initialService={initialService} initialSlot={initialSlot} />
   </div>;

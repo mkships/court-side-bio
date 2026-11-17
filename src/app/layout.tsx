@@ -1,18 +1,10 @@
 import type { Metadata } from "next";
-import { Barlow_Condensed, Inter } from "next/font/google";
-import { launchGateScript } from "@/lib/storageKeys";
+import { Onest } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const onest = Onest({
   subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
-const barlowCondensed = Barlow_Condensed({
-  subsets: ["latin"],
-  weight: ["500", "600", "700", "800", "900"],
-  variable: "--font-barlow-condensed",
+  variable: "--font-onest",
   display: "swap",
 });
 
@@ -20,15 +12,14 @@ const siteUrl = (() => { try { return new URL(process.env.NEXT_PUBLIC_SITE_URL |
 
 export const metadata: Metadata = {
   metadataBase: siteUrl,
-  title: "courtsidebio — Your court. Your page.",
+  title: "courtsidebio — The link-in-bio for tennis, pickleball and padel coaches",
   description: "Link-in-bio pages for tennis, pickleball and padel coaches and hitting partners.",
   openGraph: { siteName: "courtsidebio", type: "website" },
   twitter: { card: "summary_large_image" },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en" className={`${inter.variable} ${barlowCondensed.variable}`} suppressHydrationWarning>
-    <head><script dangerouslySetInnerHTML={{ __html: launchGateScript }} /></head>
+  return <html lang="en" className={onest.variable}>
     <body>{children}</body>
   </html>;
 }
