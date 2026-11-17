@@ -1,4 +1,4 @@
-export const BLOCKS = ["credentials", "services", "availability", "links"] as const;
+export const BLOCKS = ["credentials", "services", "testimonials", "availability", "links"] as const;
 export type BlockKey = (typeof BLOCKS)[number];
 export type ThemeKey = "centre" | "clay" | "hard" | "night";
 export const SPORTS = ["tennis", "pickleball", "padel"] as const;
@@ -6,12 +6,23 @@ export type Sport = (typeof SPORTS)[number];
 export const sportLabel = (sport: Sport) => sport[0].toUpperCase() + sport.slice(1);
 export type Role = "coach" | "hitting_partner";
 
+export const SERVICE_TYPES = ["coaching", "hitting", "clinic"] as const;
+export type ServiceType = (typeof SERVICE_TYPES)[number];
+export const SESSION_LENGTHS = [30, 45, 60, 75, 90, 120] as const;
+export const serviceName = (type: ServiceType) => type === "coaching" ? "Private coaching" : type === "hitting" ? "Hitting session" : "Group clinic";
+
 export type Service = {
-  type: "coaching" | "hitting";
+  type: ServiceType;
   enabled: boolean;
+  /** Per session, or per player for group clinics. */
   price: number | null;
   note: string;
+  /** Session length in minutes. */
+  duration: number;
 };
+
+export const MAX_TESTIMONIALS = 3;
+export type Testimonial = { quote: string; name: string; context: string };
 
 export type AvailabilitySlot = { weekday: number; start: string };
 
@@ -39,6 +50,7 @@ export type Profile = {
   availability: AvailabilitySlot[];
   availabilityVisible: boolean;
   links: { instagram: string; youtube: string; website: string };
+  testimonials: Testimonial[];
   theme: ThemeKey;
   blockOrder: BlockKey[];
   hiddenBlocks: BlockKey[];
